@@ -19,7 +19,8 @@ async function main() {
   await displayBalances(dca, deployer);
 
   console.log("Try to withdraw with another user");
-  const connectedUserDca = await dca.connect(user);
+  const signer = await ethers.getSigner(user);
+  const connectedUserDca = await dca.connect(signer);
   const withdrawTx1 = await connectedUserDca.withdraw();
   await withdrawTx1.wait(1);
   await displayBalances(dca, user);
