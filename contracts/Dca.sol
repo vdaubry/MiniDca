@@ -9,6 +9,8 @@ error Dca__NothingToWithdraw();
 contract Dca {
     mapping(address => uint256) s_addressToAmountInvested;
 
+    constructor() {}
+
     function fund() public payable {
         s_addressToAmountInvested[msg.sender] += msg.value;
     }
