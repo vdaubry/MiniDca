@@ -1,13 +1,21 @@
-# Sample Hardhat Project
+# MiniDCA
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+This project demonstrates a basic DCA protocol. Similar to mean.finance
 
-Try running some of the following tasks:
+## Tests :
 
 ```shell
-npx hardhat help
 npx hardhat test
+```
+
+## Gas report :
+
+```shell
 REPORT_GAS=true npx hardhat test
-npx hardhat node
+```
+
+## Deploy to testnet
+
+```shell
 npx hardhat run scripts/deploy.js
 ```
