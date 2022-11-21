@@ -18,8 +18,7 @@ module.exports = {
       31337: 0,
     },
     user: {
-      default: 0,
-      user1: 1,
+      default: 1,
     },
   },
 };

@@ -23,4 +23,12 @@ contract Dca {
         (bool success, ) = msg.sender.call{value: amountToWithdraw}("");
         if (!success) revert Dca__WithdrawError();
     }
+
+    function getAmountInvestedForAddress(address investor)
+        public
+        view
+        returns (uint256)
+    {
+        return s_addressToAmountInvested[investor];
+    }
 }
