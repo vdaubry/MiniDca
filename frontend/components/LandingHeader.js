@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function Header() {
+export default function LandingHeader() {
   return (
     <nav>
       <div className="container mx-auto px-6 py-2 flex justify-between items-center">

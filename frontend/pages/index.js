@@ -1,3 +1,4 @@
+import LandingHeader from "../components/LandingHeader";
 import styles from "../styles/Home.module.css";
 import Head from "next/head";
 import Image from "next/image";
@@ -12,6 +13,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <LandingHeader />
       <div
         className="py-20"
         style={{
