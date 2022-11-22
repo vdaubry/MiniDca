@@ -1,3 +1,4 @@
+import { ConnectButton } from "web3uikit";
 import Link from "next/link";
 
 export default function AppHeader() {
@@ -7,7 +8,9 @@ export default function AppHeader() {
         <Link href="/" className="font-bold text-2xl lg:text-4xl">
           Minimalist DCA
         </Link>
-        <div class="hidden lg:block">Connect Wallet</div>
+        <div class="hidden lg:block">
+          <ConnectButton />
+        </div>
       </div>
     </nav>
   );
