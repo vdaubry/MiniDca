@@ -1,18 +1,12 @@
 import LandingHeader from "../components/LandingHeader";
 import styles from "../styles/Home.module.css";
-import Head from "next/head";
+
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
   return (
     <div className={styles.container}>
-      <Head>
-        <title>Minimalist Dca</title>
-        <meta name="description" content="Dca" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <LandingHeader />
       <div
         className="py-20"
