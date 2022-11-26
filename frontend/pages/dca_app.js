@@ -1,10 +1,11 @@
 import AppHeader from "../components/AppHeader";
+import Funding from "../components/Funding";
 
 export default function DcaApp() {
   return (
     <div>
       <AppHeader />
-      <p>Foo</p>
+      <Funding />
     </div>
   );
 }
