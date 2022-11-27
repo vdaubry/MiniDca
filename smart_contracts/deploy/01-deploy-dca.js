@@ -3,13 +3,15 @@ const {
   developmentChains,
   VERIFICATION_BLOCK_CONFIRMATIONS,
 } = require("../helper-hardhat-config");
+const { verify } = require("../utils/verify");
 
 module.exports = async (hre) => {
-  console.log("Deploying Dca...");
-
   const { getNamedAccounts, deployments } = hre;
-  const { deploy } = deployments;
+  const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
+  const waitBlockConfirmations = developmentChains.includes(network.name)
+    ? 1
+    : VERIFICATION_BLOCK_CONFIRMATIONS;
 
   /***********************************
    *
@@ -17,14 +19,15 @@ module.exports = async (hre) => {
    *
    ************************************/
 
-  console.log("---------------------------------");
-  console.log(`Deploy Dca with owner : ${deployer}`);
+  log("---------------------------------");
+  log(`Deploy Dca with owner : ${deployer}`);
 
+  const arguments = [];
   const dca = await deploy("Dca", {
     from: deployer,
-    args: [],
+    args: arguments,
     log: true,
-    waitConfirmations: 1,
+    waitConfirmations: waitBlockConfirmations,
   });
 
   /***********************************
@@ -37,7 +40,7 @@ module.exports = async (hre) => {
     process.env.ETHERSCAN_API_KEY
   ) {
     log("Verifying...");
-    await verify(nftMarketplace.address, arguments);
+    await verify(dca.address, arguments);
   }
   log("----------------------------------------------------");
 };
