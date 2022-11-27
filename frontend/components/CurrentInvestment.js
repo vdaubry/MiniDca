@@ -1,16 +1,11 @@
 import { useWeb3Contract } from "react-moralis";
-import { abi, contractAddresses } from "../constants";
 import { useMoralis } from "react-moralis";
+import { abi, contractAddresses } from "../constants";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 
-export default function CurrentInvestment() {
-  const { chainId: chainIdHex, account, isWeb3Enabled } = useMoralis();
-  const chainId = parseInt(chainIdHex);
-  const dcaAddress =
-    chainIdHex && contractAddresses[chainId]
-      ? contractAddresses[chainId]["dca"]
-      : null;
+export default function CurrentInvestment({ dcaAddress }) {
+  const { account, isWeb3Enabled } = useMoralis();
   const [currentInvestment, setCurrentInvestment] = useState("0");
 
   /**************************************
