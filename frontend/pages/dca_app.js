@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { abi, contractAddresses } from "../constants";
 
 export default function DcaApp() {
-  const { chainId: chainIdHex, account, isWeb3Enabled } = useMoralis();
+  const { chainId: chainIdHex, isWeb3Enabled } = useMoralis();
   const chainId = parseInt(chainIdHex);
   const dcaAddress =
     chainIdHex && contractAddresses[chainId]
@@ -21,13 +21,17 @@ export default function DcaApp() {
    *
    **************************************/
 
+  const onChangeBalance = () => {
+    setShouldReloadUI(true);
+  };
+
   async function updateUIValues() {}
 
   useEffect(() => {
-    if (isWeb3Enabled) {
-      updateUIValues();
+    if (shouldReloadUI) {
+      setShouldReloadUI(false);
     }
-  }, [isWeb3Enabled]);
+  }, [shouldReloadUI]);
 
   return (
     <div>
@@ -36,8 +40,8 @@ export default function DcaApp() {
         dcaAddress={dcaAddress}
         shouldReloadUI={shouldReloadUI}
       />
-      <Funding dcaAddress={dcaAddress} />
-      <Withdrawing dcaAddress={dcaAddress} />
+      <Funding dcaAddress={dcaAddress} onChangeBalance={onChangeBalance} />
+      <Withdrawing dcaAddress={dcaAddress} onChangeBalance={onChangeBalance} />
     </div>
   );
 }

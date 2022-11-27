@@ -5,7 +5,7 @@ import { useMoralis } from "react-moralis";
 import { ethers } from "ethers";
 import { useNotification, Bell } from "web3uikit";
 
-export default function Funding({ dcaAddress }) {
+export default function Funding({ dcaAddress, onChangeBalance }) {
   const { isWeb3Enabled } = useMoralis();
   const dispatch = useNotification();
 
@@ -31,7 +31,7 @@ export default function Funding({ dcaAddress }) {
       await tx.wait(1);
       console.log("trasaction successful");
       handleSuccessNotification();
-      updateUIValues();
+      onChangeBalance();
     } catch (error) {
       console.log(error);
     }
@@ -52,20 +52,6 @@ export default function Funding({ dcaAddress }) {
       icon: <Bell fontSize={20} />,
     });
   };
-
-  /**************************************
-   *
-   * Render UI
-   *
-   **************************************/
-
-  async function updateUIValues() {}
-
-  useEffect(() => {
-    if (isWeb3Enabled) {
-      updateUIValues();
-    }
-  }, [isWeb3Enabled]);
 
   return (
     <div>
