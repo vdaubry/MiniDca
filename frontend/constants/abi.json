@@ -1,1 +1,33 @@
-["constructor()","error Dca__WithdrawError()","function fund() payable","function getAmountInvestedForAddress(address investor) view returns (uint256)","function withdraw()"]
+[
+  { "type": "constructor", "payable": false, "inputs": [] },
+  { "type": "error", "name": "Dca__WithdrawError", "inputs": [] },
+  {
+    "type": "function",
+    "name": "fund",
+    "constant": false,
+    "stateMutability": "payable",
+    "payable": true,
+    "gas": 29000000,
+    "inputs": [],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "getAmountInvestedForAddress",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "gas": 29000000,
+    "inputs": [{ "type": "address", "name": "investor" }],
+    "outputs": [{ "type": "uint256" }]
+  },
+  {
+    "type": "function",
+    "name": "withdraw",
+    "constant": false,
+    "payable": false,
+    "gas": 29000000,
+    "inputs": [],
+    "outputs": []
+  }
+]

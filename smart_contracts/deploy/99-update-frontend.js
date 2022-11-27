@@ -25,7 +25,7 @@ const updateAbi = async () => {
 
   fs.writeFileSync(
     frontendAbiFile,
-    JSON.stringify(dca.interface.format(ethers.utils.FormatTypes.JSON))
+    dca.interface.format(ethers.utils.FormatTypes.json)
   );
 };
 
