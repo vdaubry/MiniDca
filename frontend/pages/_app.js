@@ -2,6 +2,7 @@ import "../styles/globals.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { MoralisProvider } from "react-moralis";
+import { NotificationProvider } from "web3uikit";
 
 import Head from "next/head";
 
@@ -16,7 +17,9 @@ function MyApp({ Component, pageProps }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <MoralisProvider initializeOnMount={false}>
-        <Component {...pageProps} />
+        <NotificationProvider>
+          <Component {...pageProps} />
+        </NotificationProvider>
       </MoralisProvider>
     </div>
   );
