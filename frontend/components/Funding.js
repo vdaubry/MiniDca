@@ -98,8 +98,6 @@ export default function Funding() {
               disabled={isFetching || isLoading}
               onClick={async () => {
                 await fundContract({
-                  // onComplete:
-                  // onError:
                   onSuccess: handleSuccess,
                   onError: (error) => console.log(error),
                 });
