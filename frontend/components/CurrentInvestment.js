@@ -1,10 +1,10 @@
 import { useWeb3Contract } from "react-moralis";
 import { useMoralis } from "react-moralis";
-import { abi, contractAddresses } from "../constants";
+import { abi } from "../constants";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 
-export default function CurrentInvestment({ dcaAddress }) {
+export default function CurrentInvestment({ dcaAddress, shouldReloadUI }) {
   const { account, isWeb3Enabled } = useMoralis();
   const [currentInvestment, setCurrentInvestment] = useState("0");
 
@@ -36,7 +36,7 @@ export default function CurrentInvestment({ dcaAddress }) {
     if (isWeb3Enabled) {
       updateUIValues();
     }
-  }, [isWeb3Enabled]);
+  }, [isWeb3Enabled, shouldReloadUI]);
 
   return (
     <div>

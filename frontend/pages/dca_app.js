@@ -13,6 +13,7 @@ export default function DcaApp() {
     chainIdHex && contractAddresses[chainId]
       ? contractAddresses[chainId]["dca"]
       : null;
+  const [shouldReloadUI, setShouldReloadUI] = useState(false);
 
   /**************************************
    *
@@ -31,9 +32,12 @@ export default function DcaApp() {
   return (
     <div>
       <AppHeader />
-      <CurrentInvestment dcaAddress={dcaAddress} />
-      <Funding />
-      <Withdrawing />
+      <CurrentInvestment
+        dcaAddress={dcaAddress}
+        shouldReloadUI={shouldReloadUI}
+      />
+      <Funding dcaAddress={dcaAddress} />
+      <Withdrawing dcaAddress={dcaAddress} />
     </div>
   );
 }

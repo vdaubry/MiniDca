@@ -1,17 +1,12 @@
 import { useEffect, useState } from "react";
 import { useWeb3Contract } from "react-moralis";
-import { abi, contractAddresses } from "../constants";
+import { abi } from "../constants";
 import { useMoralis } from "react-moralis";
 import { ethers } from "ethers";
 import { useNotification, Bell } from "web3uikit";
 
-export default function Funding() {
-  const { chainId: chainIdHex, account, isWeb3Enabled } = useMoralis();
-  const chainId = parseInt(chainIdHex);
-  const dcaAddress =
-    chainIdHex && contractAddresses[chainId]
-      ? contractAddresses[chainId]["dca"]
-      : null;
+export default function Funding({ dcaAddress }) {
+  const { isWeb3Enabled } = useMoralis();
   const dispatch = useNotification();
 
   /**************************************
