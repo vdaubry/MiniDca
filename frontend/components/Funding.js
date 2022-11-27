@@ -4,10 +4,14 @@ import { abi } from "../constants";
 import { useMoralis } from "react-moralis";
 import { ethers } from "ethers";
 import { useNotification, Bell } from "web3uikit";
+import FundingFormModal from "./FundingFormModal";
 
 export default function Funding({ dcaAddress, onChangeBalance }) {
+  const [isModalVisible, setIsModalVisible] = useState(0);
   const { isWeb3Enabled } = useMoralis();
   const dispatch = useNotification();
+  const [fundingAmount, setFundingAmount] = useState("0");
+  const [shouldFundContract, setShouldFundContract] = useState(false);
 
   /**************************************
    *
@@ -24,13 +28,14 @@ export default function Funding({ dcaAddress, onChangeBalance }) {
     contractAddress: dcaAddress,
     functionName: "fund",
     params: {},
-    msgValue: ethers.utils.parseEther("0.1"),
+    msgValue: ethers.utils.parseEther(fundingAmount),
   });
 
   const handleSuccess = async (tx) => {
     try {
       await tx.wait(1);
       console.log("trasaction successful");
+      setIsModalVisible(false);
       handleSuccessNotification();
       onChangeBalance();
     } catch (error) {
@@ -54,19 +59,44 @@ export default function Funding({ dcaAddress, onChangeBalance }) {
     });
   };
 
+  const onClose = () => {
+    setIsModalVisible(false);
+  };
+
+  const onOk = async (_fundingAmount) => {
+    setFundingAmount(_fundingAmount);
+    setShouldFundContract(true);
+    console.log("Funding contract");
+  };
+
+  const handleFundContract = async () => {
+    setShouldFundContract(false);
+    await fundContract({
+      onSuccess: handleSuccess,
+      onError: (error) => console.log(error),
+    });
+  };
+
+  useEffect(() => {
+    if (isWeb3Enabled && shouldFundContract) {
+      handleFundContract();
+    }
+  }, [isWeb3Enabled, shouldFundContract]);
+
   return (
     <div>
       {dcaAddress ? (
         <div>
+          <FundingFormModal
+            isVisible={isModalVisible}
+            onClose={onClose}
+            onOk={onOk}
+          />
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             disabled={isFetching || isLoading}
-            onClick={async () => {
-              await fundContract({
-                onSuccess: handleSuccess,
-                onError: (error) => console.log(error),
-              });
-              console.log("Funding contract");
+            onClick={() => {
+              setIsModalVisible(true);
             }}
           >
             {isLoading || isFetching ? (
