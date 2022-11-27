@@ -21,15 +21,14 @@ export default function Funding() {
    **************************************/
 
   const {
-    runContractFunction: fundContract,
+    runContractFunction: withdrawFromContract,
     isFetching,
     isLoading,
   } = useWeb3Contract({
     abi: abi,
     contractAddress: dcaAddress,
-    functionName: "fund",
+    functionName: "withdraw",
     params: {},
-    msgValue: ethers.utils.parseEther("0.1"),
   });
 
   const handleSuccess = async (tx) => {
@@ -69,6 +68,7 @@ export default function Funding() {
 
   useEffect(() => {
     if (isWeb3Enabled) {
+      updateUIValues();
     }
   }, [isWeb3Enabled]);
 
@@ -76,23 +76,25 @@ export default function Funding() {
     <div>
       {dcaAddress ? (
         <div>
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            disabled={isFetching || isLoading}
-            onClick={async () => {
-              await fundContract({
-                onSuccess: handleSuccess,
-                onError: (error) => console.log(error),
-              });
-              console.log("Funding contract");
-            }}
-          >
-            {isLoading || isFetching ? (
-              <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
-            ) : (
-              <div>Fund contract</div>
-            )}
-          </button>
+          <div>
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              disabled={isFetching || isLoading}
+              onClick={async () => {
+                await withdrawFromContract({
+                  onSuccess: handleSuccess,
+                  onError: (error) => console.log(error),
+                });
+                console.log("Withdrawing from contract");
+              }}
+            >
+              {isLoading || isFetching ? (
+                <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+              ) : (
+                <div>Withdraw</div>
+              )}
+            </button>
+          </div>
         </div>
       ) : (
         <div>
