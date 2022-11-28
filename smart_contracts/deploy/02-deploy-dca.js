@@ -22,7 +22,8 @@ module.exports = async (hre) => {
   log("---------------------------------");
   log(`Deploy Dca with owner : ${deployer}`);
 
-  const arguments = [];
+  const usdc = await ethers.getContract("Usdc", deployer);
+  const arguments = [usdc.address];
   const dca = await deploy("Dca", {
     from: deployer,
     args: arguments,
