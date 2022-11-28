@@ -25,11 +25,9 @@ contract Dca {
         if (!success) revert Dca__WithdrawError();
     }
 
-    function getAmountInvestedForAddress(address investor)
-        public
-        view
-        returns (uint256)
-    {
+    function getAmountInvestedForAddress(
+        address investor
+    ) public view returns (uint256) {
         return s_addressToAmountInvested[investor];
     }
 }

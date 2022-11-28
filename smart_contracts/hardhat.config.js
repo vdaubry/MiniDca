@@ -49,6 +49,9 @@ module.exports = {
     user: {
       default: 1,
     },
+    user2: {
+      default: 2,
+    },
   },
   mocha: {
     timeout: 200000, // 200 seconds max for running tests
