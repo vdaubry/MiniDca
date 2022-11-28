@@ -15,7 +15,7 @@ const networkConfig = {
 
 const developmentChains = ["hardhat", "localhost"];
 const VERIFICATION_BLOCK_CONFIRMATIONS = 6;
-const USDC_CONTRACT = {
+const USDC_CONTRACT_ADRESSES = {
   5: {
     address: "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
   },
