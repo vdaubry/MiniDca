@@ -4,6 +4,7 @@ require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
 require("solidity-coverage");
 require("solidity-coverage");
+require("hardhat-contract-sizer");
 require("dotenv").config();
 
 const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
