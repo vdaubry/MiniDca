@@ -9,17 +9,24 @@ const { developmentChains } = require("../../helper-hardhat-config");
       let user;
       let dca;
 
-      describe("fund", () => {
+      describe("deposit", () => {
         beforeEach(async () => {
           await deployments.fixture(["all"]);
           deployer = (await getNamedAccounts()).deployer;
           user = (await getNamedAccounts()).user;
           dca = await ethers.getContract("Dca", deployer);
+          usdc = await ethers.getContract("Usdc", deployer);
+
+          const mintTx = await usdc.mint(
+            deployer,
+            ethers.utils.parseEther("100")
+          );
+          await mintTx.wait(1);
         });
 
-        it("sets invested amount", async () => {
-          dca.fund({
-            value: ethers.utils.parseEther("0.1"),
+        it("sets deposited amount", async () => {
+          dca.deposit({
+            depositAmount: "50",
           });
 
           const amountInvestedDeployer = await dca.getAmountInvestedForAddress(
@@ -27,7 +34,7 @@ const { developmentChains } = require("../../helper-hardhat-config");
           );
           assert(
             ethers.utils.formatEther(amountInvestedDeployer.toString()),
-            "0.1"
+            "50"
           );
 
           const amountInvestedUser = await dca.getAmountInvestedForAddress(
@@ -35,12 +42,27 @@ const { developmentChains } = require("../../helper-hardhat-config");
           );
           assert(amountInvestedUser.toString(), "0");
         });
+
+        it("transfers funds from user to contract", async () => {
+          const startDeployerBalance = await usdc.balanceOf(deployer);
+          assert(startDeployerBalance.toString(), "100");
+
+          dca.deposit({
+            depositAmount: "50",
+          });
+
+          const finalDeployerBalance = await usdc.balanceOf(deployer);
+          assert(finalDeployerBalance.toString(), "50");
+
+          const dcaBalance = await usdc.balanceOf(dca.address);
+          assert(dcaBalance.toString(), "50");
+        });
       });
 
       describe("withdraw", () => {
-        it("returns funds to sender", async () => {
-          dca.fund({
-            value: ethers.utils.parseEther("0.2"),
+        it("returns tokens to sender", async () => {
+          dca.deposit({
+            depositAmount: "50",
           });
 
           await dca.withdraw();
@@ -50,13 +72,16 @@ const { developmentChains } = require("../../helper-hardhat-config");
           );
           assert(amountInvestedDeployer.toString(), "0");
 
-          const dcaBalance = await ethers.provider.getBalance(dca.address);
+          const dcaBalance = await usdc.balanceOf(dca.address);
           assert(dcaBalance.toString(), "0");
+
+          const deployerBalance = await usdc.balanceOf(deployer);
+          assert(dcaBalance.toString(), "100");
         });
 
         it("doesnt withdraw if user has no fund", async () => {
-          dca.fund({
-            value: ethers.utils.parseEther("0.2"),
+          dca.deposit({
+            depositAmount: "50",
           });
 
           const signer = await ethers.getSigner(user);
@@ -64,8 +89,8 @@ const { developmentChains } = require("../../helper-hardhat-config");
 
           await conectedUserDca.withdraw();
 
-          const dcaBalance = await ethers.provider.getBalance(dca.address);
-          assert(ethers.utils.parseEther(dcaBalance.toString()), "0.2");
+          const dcaBalance = await usdc.balanceOf(dca.address);
+          assert(ethers.utils.parseEther(dcaBalance.toString()), "50");
         });
       });
     });
