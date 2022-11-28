@@ -10,9 +10,9 @@ export default function LandingHeader() {
         <div className="hidden lg:block">
           <ul className="inline-flex">
             <li>
-              <a className="px-4 font-bold" href="/">
+              <Link className="px-4 font-bold" href="/">
                 Home
-              </a>
+              </Link>
             </li>
             <li>
               <a
