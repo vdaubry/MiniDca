@@ -3,6 +3,7 @@ const { network, ethers } = require("hardhat");
 const {
   developmentChains,
   USDC_CONTRACT_ADRESSES,
+  USDC_TESTNET_ABI,
 } = require("../helper-hardhat-config");
 
 const frontendAddressesFile = "../frontend/constants/contractAddresses.json";
@@ -42,11 +43,15 @@ const updateAbi = async () => {
     dca.interface.format(ethers.utils.FormatTypes.json)
   );
 
-  const usdc = await ethers.getContract("Usdc");
-  fs.writeFileSync(
-    frontendUsdcAbiFile,
-    usdc.interface.format(ethers.utils.FormatTypes.json)
-  );
+  let usdc_abi_json = "";
+  if (developmentChains.includes(network.name)) {
+    const usdc = await ethers.getContract("Usdc");
+    usdc_abi_json = usdc.interface.format(ethers.utils.FormatTypes.json);
+  } else {
+    usdc_abi_json = JSON.stringify(USDC_TESTNET_ABI);
+  }
+
+  fs.writeFileSync(frontendUsdcAbiFile, usdc_abi_json);
 };
 
 module.exports.tags = ["all", "frontend"];

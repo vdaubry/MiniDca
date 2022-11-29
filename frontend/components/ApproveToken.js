@@ -52,10 +52,20 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
     });
   };
 
+  const handleFailureNotification = (msg) => {
+    dispatch({
+      type: "error",
+      message: msg,
+      title: "Error",
+      position: "topR",
+      icon: <Bell fontSize={20} />,
+    });
+  };
+
   const handleApproveContract = async () => {
     await approveUsdc({
       onSuccess: handleSuccess,
-      onError: (error) => console.log(error),
+      onError: (error) => handleFailureNotification(error.data.message),
     });
   };
 

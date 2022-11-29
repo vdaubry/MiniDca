@@ -65,6 +65,7 @@ export default function DcaApp() {
       <AppHeader />
       <CurrentInvestment
         dcaAddress={dcaAddress}
+        usdcAddress={usdcAddress}
         shouldReloadUI={shouldReloadUI}
       />
 

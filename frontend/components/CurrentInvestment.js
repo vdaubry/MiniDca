@@ -1,12 +1,17 @@
 import { useWeb3Contract } from "react-moralis";
 import { useMoralis } from "react-moralis";
-import { dcaAbi } from "../constants";
+import { dcaAbi, usdcAbi } from "../constants";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 
-export default function CurrentInvestment({ dcaAddress, shouldReloadUI }) {
+export default function CurrentInvestment({
+  dcaAddress,
+  usdcAddress,
+  shouldReloadUI,
+}) {
   const { account, isWeb3Enabled } = useMoralis();
   const [currentInvestment, setCurrentInvestment] = useState("0");
+  const [balance, setBalance] = useState("0");
 
   /**************************************
    *
@@ -21,6 +26,13 @@ export default function CurrentInvestment({ dcaAddress, shouldReloadUI }) {
     params: { investor: account },
   });
 
+  const { runContractFunction: getBalance } = useWeb3Contract({
+    abi: usdcAbi,
+    contractAddress: usdcAddress,
+    functionName: "balanceOf",
+    params: { account: account },
+  });
+
   /**************************************
    *
    * Render UI
@@ -30,6 +42,9 @@ export default function CurrentInvestment({ dcaAddress, shouldReloadUI }) {
   async function updateUIValues() {
     const currentInvestmentFromCall = (await getCurrentInvestment()).toString();
     setCurrentInvestment(currentInvestmentFromCall);
+
+    const balanceFromCall = (await getBalance()).toString();
+    setBalance(balanceFromCall);
   }
 
   useEffect(() => {
@@ -42,8 +57,11 @@ export default function CurrentInvestment({ dcaAddress, shouldReloadUI }) {
     <div>
       {dcaAddress ? (
         <div>
-          Your current investment :{" "}
-          {ethers.utils.formatUnits(currentInvestment, 6)}{" "}
+          <div>
+            Your current investment :{" "}
+            {ethers.utils.formatUnits(currentInvestment, 6)}{" "}
+          </div>
+          <div>Your Usdc balance : {ethers.utils.formatUnits(balance, 6)} </div>
         </div>
       ) : (
         <div>

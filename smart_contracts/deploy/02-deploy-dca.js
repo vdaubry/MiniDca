@@ -2,6 +2,7 @@ const { network, ethers } = require("hardhat");
 const {
   developmentChains,
   VERIFICATION_BLOCK_CONFIRMATIONS,
+  USDC_CONTRACT_ADRESSES,
 } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 
@@ -12,6 +13,7 @@ module.exports = async (hre) => {
   const waitBlockConfirmations = developmentChains.includes(network.name)
     ? 1
     : VERIFICATION_BLOCK_CONFIRMATIONS;
+  const chainId = network.config.chainId;
 
   /***********************************
    *
@@ -22,8 +24,11 @@ module.exports = async (hre) => {
   log("---------------------------------");
   log(`Deploy Dca with owner : ${deployer}`);
 
-  const usdc = await ethers.getContract("Usdc", deployer);
-  const arguments = [usdc.address];
+  const usdc_address = developmentChains.includes(network.name)
+    ? (await ethers.getContract("Usdc", deployer)).address
+    : USDC_CONTRACT_ADRESSES[chainId]["address"];
+
+  const arguments = [usdc_address];
   const dca = await deploy("Dca", {
     from: deployer,
     args: arguments,

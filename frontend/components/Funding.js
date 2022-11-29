@@ -58,6 +58,16 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
     });
   };
 
+  const handleFailureNotification = (msg) => {
+    dispatch({
+      type: "error",
+      message: msg,
+      title: "Error",
+      position: "topR",
+      icon: <Bell fontSize={20} />,
+    });
+  };
+
   const onClose = () => {
     setIsModalVisible(false);
   };
@@ -65,6 +75,7 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
   const onOk = async (_fundingAmount) => {
     setFundingAmount(_fundingAmount);
     setShouldFundContract(true);
+    setIsModalVisible(false);
     console.log("Funding contract");
   };
 
@@ -72,7 +83,9 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
     setShouldFundContract(false);
     await deposit({
       onSuccess: handleSuccess,
-      onError: (error) => console.log(error),
+      onError: (error) => {
+        handleFailureNotification(error.message);
+      },
     });
   };
 
