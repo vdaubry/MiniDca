@@ -1,19 +1,38 @@
 import AppHeader from "../components/AppHeader";
 import Funding from "../components/Funding";
 import Withdrawing from "../components/Withdrawing";
-import { useMoralis } from "react-moralis";
+import { useWeb3Contract, useMoralis } from "react-moralis";
 import CurrentInvestment from "../components/CurrentInvestment";
+import ApproveToken from "../components/ApproveToken";
 import { useEffect, useState } from "react";
 import { abi, contractAddresses } from "../constants";
 
 export default function DcaApp() {
-  const { chainId: chainIdHex, isWeb3Enabled } = useMoralis();
+  const { chainId: chainIdHex, account, isWeb3Enabled } = useMoralis();
   const chainId = parseInt(chainIdHex);
   const dcaAddress =
     chainIdHex && contractAddresses[chainId]
       ? contractAddresses[chainId]["dca"]
       : null;
+  const usdcAddress =
+    chainIdHex && contractAddresses[chainId]
+      ? contractAddresses[chainId]["usdc"]
+      : null;
   const [shouldReloadUI, setShouldReloadUI] = useState(false);
+  const [isUsdcApproved, setIsUsdcApproved] = useState(false);
+
+  /**************************************
+   *
+   * Smart contract function calls
+   *
+   **************************************/
+
+  const { runContractFunction: allowance } = useWeb3Contract({
+    abi: abi,
+    contractAddress: usdcAddress,
+    functionName: "allowance",
+    params: { owner: account, spender: dcaAddress },
+  });
 
   /**************************************
    *
@@ -25,13 +44,17 @@ export default function DcaApp() {
     setShouldReloadUI(true);
   };
 
-  async function updateUIValues() {}
+  async function updateUIValues() {
+    const usdcAllowance = await allowance();
+    setIsUsdcApproved(usdcAllowance != undefined && usdcAllowance > 0);
+  }
 
   useEffect(() => {
     if (shouldReloadUI) {
       setShouldReloadUI(false);
     }
-  }, [shouldReloadUI]);
+    updateUIValues();
+  }, [shouldReloadUI, isUsdcApproved]);
 
   return (
     <div>
@@ -40,8 +63,25 @@ export default function DcaApp() {
         dcaAddress={dcaAddress}
         shouldReloadUI={shouldReloadUI}
       />
-      <Funding dcaAddress={dcaAddress} onChangeBalance={onChangeBalance} />
-      <Withdrawing dcaAddress={dcaAddress} onChangeBalance={onChangeBalance} />
+
+      {isUsdcApproved ? (
+        <div>
+          <Funding
+            dcaAddress={dcaAddress}
+            usdcAddress={usdcAddress}
+            onChangeBalance={onChangeBalance}
+          />
+          <Withdrawing
+            dcaAddress={dcaAddress}
+            onChangeBalance={onChangeBalance}
+          />
+        </div>
+      ) : (
+        <ApproveToken
+          dcaAddress={dcaAddress}
+          usdcAddress={usdcAddress}
+        ></ApproveToken>
+      )}
     </div>
   );
 }

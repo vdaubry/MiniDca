@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
-import { useWeb3Contract } from "react-moralis";
+import { useWeb3Contract, useMoralis } from "react-moralis";
 import { abi } from "../constants";
-import { useMoralis } from "react-moralis";
 import { ethers } from "ethers";
 import { useNotification, Bell } from "web3uikit";
 import FundingFormModal from "./FundingFormModal";
 
-export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
+export default function ApproveToken({ dcaAddress, usdcAddress }) {
   const [isModalVisible, setIsModalVisible] = useState(0);
-  const { isWeb3Enabled } = useMoralis();
+  const { account, isWeb3Enabled } = useMoralis();
   const dispatch = useNotification();
-  const [fundingAmount, setFundingAmount] = useState("0");
-  const [shouldFundContract, setShouldFundContract] = useState(false);
 
   /**************************************
    *
@@ -20,24 +17,21 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
    **************************************/
 
   const {
-    runContractFunction: fundContract,
+    runContractFunction: approveUsdc,
     isFetching,
     isLoading,
   } = useWeb3Contract({
     abi: abi,
-    contractAddress: dcaAddress,
-    functionName: "fund",
-    params: {},
-    msgValue: ethers.utils.parseEther(fundingAmount),
+    contractAddress: usdcAddress,
+    functionName: "allowance",
+    params: { owner: account, spender: dcaAddress },
   });
 
   const handleSuccess = async (tx) => {
     try {
       await tx.wait(1);
       console.log("transaction successful");
-      setIsModalVisible(false);
       handleSuccessNotification();
-      onChangeBalance();
     } catch (error) {
       console.log(error);
     }
@@ -59,50 +53,33 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
     });
   };
 
-  const onClose = () => {
-    setIsModalVisible(false);
-  };
-
-  const onOk = async (_fundingAmount) => {
-    setFundingAmount(_fundingAmount);
-    setShouldFundContract(true);
-    console.log("Funding contract");
-  };
-
-  const handleFundContract = async () => {
-    setShouldFundContract(false);
-    await fundContract({
+  const handleApproveContract = async () => {
+    await approveUsdc({
       onSuccess: handleSuccess,
       onError: (error) => console.log(error),
     });
   };
 
   useEffect(() => {
-    if (isWeb3Enabled && shouldFundContract) {
-      handleFundContract();
+    if (isWeb3Enabled) {
     }
-  }, [isWeb3Enabled, shouldFundContract]);
+  }, [isWeb3Enabled]);
 
   return (
     <div>
       {dcaAddress ? (
         <div>
-          <FundingFormModal
-            isVisible={isModalVisible}
-            onClose={onClose}
-            onOk={onOk}
-          />
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             disabled={isFetching || isLoading}
             onClick={() => {
-              setIsModalVisible(true);
+              handleApproveContract();
             }}
           >
             {isLoading || isFetching ? (
               <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
             ) : (
-              <div>Fund contract</div>
+              <div>Approve USDC</div>
             )}
           </button>
         </div>
