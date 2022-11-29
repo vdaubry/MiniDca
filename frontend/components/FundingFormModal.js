@@ -14,7 +14,7 @@ export default function FundingFormModal({ isVisible, onClose, onOk }) {
       }}
     >
       <Input
-        label="Amount you want to fund (ETH)"
+        label="Amount you want to fund (USDC)"
         name="Funding Amount"
         type="number"
         onChange={(event) => {

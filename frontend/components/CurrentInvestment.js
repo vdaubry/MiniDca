@@ -43,7 +43,7 @@ export default function CurrentInvestment({ dcaAddress, shouldReloadUI }) {
       {dcaAddress ? (
         <div>
           Your current investment :{" "}
-          {ethers.utils.formatEther(currentInvestment)}{" "}
+          {ethers.utils.formatUnits(currentInvestment, 6)}{" "}
         </div>
       ) : (
         <div>

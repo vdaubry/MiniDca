@@ -7,8 +7,8 @@ async function main() {
 
   // Step1 : Fund Contract
   console.log("Fund contract");
-  const fundTx = await dca.fund({
-    value: ethers.utils.parseEther("0.1"),
+  const fundTx = await dca.deposit({
+    fundingAmount: "50",
   });
   await fundTx.wait(1);
 

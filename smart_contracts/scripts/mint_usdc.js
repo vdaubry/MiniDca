@@ -11,14 +11,14 @@ async function main() {
   const usdc = await ethers.getContract("Usdc", deployer);
   const dca = await ethers.getContract("Dca", deployer);
 
-  // Step1 : Mint Usdc and send to account 1
-  console.log("Mint Usdc for account 1");
-  const mintTx = await usdc.mint(user, ethers.utils.parseUnits("100", 6));
+  // Step1 : Mint Usdc and send to deployer
+  console.log("Mint Usdc for deployer");
+  const mintTx = await usdc.mint(deployer, ethers.utils.parseUnits("100", 6));
   await mintTx.wait(1);
 
-  // Step2 : Mint Usdc and send to account 2
-  console.log("Mint Usdc for account 2");
-  const mintTx2 = await usdc.mint(user2, ethers.utils.parseUnits("100", 6));
+  // Step2 : Mint Usdc and send to account 1
+  console.log("Mint Usdc for account 1");
+  const mintTx2 = await usdc.mint(user, ethers.utils.parseUnits("100", 6));
   await mintTx2.wait(1);
 
   // Step3 : Approve contract to spend USDC

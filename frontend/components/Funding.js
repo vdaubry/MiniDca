@@ -20,15 +20,14 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
    **************************************/
 
   const {
-    runContractFunction: fundContract,
+    runContractFunction: deposit,
     isFetching,
     isLoading,
   } = useWeb3Contract({
     abi: dcaAbi,
     contractAddress: dcaAddress,
-    functionName: "fund",
-    params: {},
-    msgValue: ethers.utils.parseEther(fundingAmount),
+    functionName: "deposit",
+    params: { depositAmount: fundingAmount },
   });
 
   const handleSuccess = async (tx) => {
@@ -71,7 +70,7 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
 
   const handleFundContract = async () => {
     setShouldFundContract(false);
-    await fundContract({
+    await deposit({
       onSuccess: handleSuccess,
       onError: (error) => console.log(error),
     });
