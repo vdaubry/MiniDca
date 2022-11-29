@@ -3,7 +3,6 @@ import { useWeb3Contract, useMoralis } from "react-moralis";
 import { usdcAbi } from "../constants";
 import { ethers } from "ethers";
 import { useNotification, Bell } from "web3uikit";
-import FundingFormModal from "./FundingFormModal";
 
 export default function ApproveToken({ dcaAddress, usdcAddress }) {
   const [isModalVisible, setIsModalVisible] = useState(0);
@@ -23,8 +22,8 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
   } = useWeb3Contract({
     abi: usdcAbi,
     contractAddress: usdcAddress,
-    functionName: "allowance",
-    params: { owner: account, spender: dcaAddress },
+    functionName: "approve",
+    params: { spender: dcaAddress, amount: ethers.constants.MaxInt256 },
   });
 
   const handleSuccess = async (tx) => {

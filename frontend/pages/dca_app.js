@@ -5,7 +5,7 @@ import { useWeb3Contract, useMoralis } from "react-moralis";
 import CurrentInvestment from "../components/CurrentInvestment";
 import ApproveToken from "../components/ApproveToken";
 import { useEffect, useState } from "react";
-import { abi, contractAddresses } from "../constants";
+import { usdcAbi, contractAddresses } from "../constants";
 
 export default function DcaApp() {
   const { chainId: chainIdHex, account, isWeb3Enabled } = useMoralis();
@@ -28,7 +28,7 @@ export default function DcaApp() {
    **************************************/
 
   const { runContractFunction: allowance } = useWeb3Contract({
-    abi: abi,
+    abi: usdcAbi,
     contractAddress: usdcAddress,
     functionName: "allowance",
     params: { owner: account, spender: dcaAddress },
@@ -46,7 +46,11 @@ export default function DcaApp() {
 
   async function updateUIValues() {
     const usdcAllowance = await allowance();
-    setIsUsdcApproved(usdcAllowance != undefined && usdcAllowance > 0);
+    if (usdcAllowance == undefined) {
+      setShouldReloadUI(true);
+    } else {
+      setIsUsdcApproved(usdcAllowance > 0);
+    }
   }
 
   useEffect(() => {
