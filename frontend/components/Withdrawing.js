@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useWeb3Contract } from "react-moralis";
-import { abi } from "../constants";
+import { dcaAbi } from "../constants";
 import { useMoralis } from "react-moralis";
 import { ethers } from "ethers";
 import { useNotification, Bell } from "web3uikit";
@@ -20,7 +20,7 @@ export default function Funding({ dcaAddress, onChangeBalance }) {
     isFetching,
     isLoading,
   } = useWeb3Contract({
-    abi: abi,
+    abi: dcaAbi,
     contractAddress: dcaAddress,
     functionName: "withdraw",
     params: {},

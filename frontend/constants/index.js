@@ -1,7 +1,9 @@
 const contractAddresses = require("./contractAddresses");
-const abi = require("./abi");
+const dcaAbi = require("./dca_abi");
+const usdcAbi = require("./dca_abi");
 
 module.exports = {
-  abi,
+  dcaAbi,
+  usdcAbi,
   contractAddresses,
 };

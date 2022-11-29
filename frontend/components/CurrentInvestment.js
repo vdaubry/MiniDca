@@ -1,6 +1,6 @@
 import { useWeb3Contract } from "react-moralis";
 import { useMoralis } from "react-moralis";
-import { abi } from "../constants";
+import { dcaAbi } from "../constants";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 
@@ -15,7 +15,7 @@ export default function CurrentInvestment({ dcaAddress, shouldReloadUI }) {
    **************************************/
 
   const { runContractFunction: getCurrentInvestment } = useWeb3Contract({
-    abi: abi,
+    abi: dcaAbi,
     contractAddress: dcaAddress,
     functionName: "getAmountInvestedForAddress",
     params: { investor: account },

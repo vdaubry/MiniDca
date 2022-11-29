@@ -6,7 +6,8 @@ const {
 } = require("../helper-hardhat-config");
 
 const frontendAddressesFile = "../frontend/constants/contractAddresses.json";
-const frontendAbiFile = "../frontend/constants/abi.json";
+const frontendDcaAbiFile = "../frontend/constants/dca_abi.json";
+const frontendUsdcAbiFile = "../frontend/constants/usdc_abi.json";
 
 module.exports = async (hre) => {
   await updateAddresses();
@@ -36,10 +37,15 @@ const updateAddresses = async () => {
 
 const updateAbi = async () => {
   const dca = await ethers.getContract("Dca");
-
   fs.writeFileSync(
-    frontendAbiFile,
+    frontendDcaAbiFile,
     dca.interface.format(ethers.utils.FormatTypes.json)
+  );
+
+  const usdc = await ethers.getContract("Usdc");
+  fs.writeFileSync(
+    frontendUsdcAbiFile,
+    usdc.interface.format(ethers.utils.FormatTypes.json)
   );
 };
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useWeb3Contract, useMoralis } from "react-moralis";
-import { abi } from "../constants";
+import { usdcAbi } from "../constants";
 import { ethers } from "ethers";
 import { useNotification, Bell } from "web3uikit";
 import FundingFormModal from "./FundingFormModal";
@@ -21,7 +21,7 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
     isFetching,
     isLoading,
   } = useWeb3Contract({
-    abi: abi,
+    abi: usdcAbi,
     contractAddress: usdcAddress,
     functionName: "allowance",
     params: { owner: account, spender: dcaAddress },
