@@ -24,10 +24,21 @@ contract Dca {
     }
 
     function deposit(uint256 depositAmount) public {
-        require(depositAmount > 0);
+        require(depositAmount > 0, "deposit: Amount must be greater than zero");
+        require(
+            s_usdc.allowance(msg.sender, address(this)) >= depositAmount,
+            "deposit: Insufficient allowance"
+        );
 
         uint256 formatedDepositAmount = depositAmount * 10 ** 6; //USDC has 6 decimals
-        s_usdc.transferFrom(msg.sender, address(this), formatedDepositAmount);
+        require(
+            s_usdc.transferFrom(
+                msg.sender,
+                address(this),
+                formatedDepositAmount
+            ),
+            "deposit: transferFrom failed"
+        );
         s_addressToAmountDeposited[msg.sender] += formatedDepositAmount;
     }
 
