@@ -23,6 +23,7 @@
     "hardhat-deploy": "^0.11.20",
     "hardhat-gas-reporter": "^1.0.8",
     "solidity-coverage": "^0.8.0",
-    "typechain": "^8.1.0"
+    "typechain": "^8.1.0",
+    "web3": "^1.8.1"
   }
 }
