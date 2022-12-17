@@ -2,7 +2,7 @@ const { ethers, getNamedAccounts } = require("hardhat");
 
 async function main() {
   const { deployer, user } = await getNamedAccounts();
-  const dca = await ethers.getContract("Dca", deployer);
+  const dca = await ethers.getContract("SampleLog", deployer);
   console.log(`Got contract Dca at ${dca.address}`);
 
   // Step1 : Fund Contract
