@@ -2,7 +2,7 @@ const { network, ethers } = require("hardhat");
 const {
   developmentChains,
   VERIFICATION_BLOCK_CONFIRMATIONS,
-  USDC_CONTRACT_ADRESSES,
+  networkConfig,
 } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 
@@ -17,22 +17,17 @@ module.exports = async (hre) => {
 
   /***********************************
    *
-   * Deploy DCA smart contract
+   * Deploy Swap contract
    *
    ************************************/
 
   log("---------------------------------");
-  log(`Deploy Dca with owner : ${deployer}`);
+  log(`Deploy Swap with owner : ${deployer}`);
 
-  const usdc_address = developmentChains.includes(network.name)
-    ? (await ethers.getContract("Usdc", deployer)).address
-    : USDC_CONTRACT_ADRESSES[chainId]["address"];
+  const router_address = networkConfig[network.config.chainId].swapRouter;
 
-  const arguments = [
-    usdc_address,
-    "0x0000000000000000000000000000000000000000",
-  ];
-  const dca = await deploy("Dca", {
+  const arguments = [router_address];
+  const swap = await deploy("SimpleSwap", {
     from: deployer,
     args: arguments,
     log: true,
@@ -49,9 +44,9 @@ module.exports = async (hre) => {
     process.env.ETHERSCAN_API_KEY
   ) {
     log("Verifying...");
-    await verify(dca.address, arguments);
+    await verify(swap.address, arguments);
   }
   log("----------------------------------------------------");
 };
 
-module.exports.tags = ["all", "dca"];
+module.exports.tags = ["all", "swap"];

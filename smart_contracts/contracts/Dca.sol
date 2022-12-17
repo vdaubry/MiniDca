@@ -5,6 +5,7 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
+import "hardhat/console.sol";
 
 error Dca__WithdrawError();
 
@@ -24,6 +25,7 @@ contract Dca {
     }
 
     function deposit(uint256 depositAmount) public {
+        console.log("Calling deposit");
         require(depositAmount > 0, "deposit: Amount must be greater than zero");
         require(
             s_usdc.allowance(msg.sender, address(this)) >= depositAmount,

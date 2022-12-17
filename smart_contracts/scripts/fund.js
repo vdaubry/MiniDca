@@ -7,9 +7,7 @@ async function main() {
 
   // Step1 : Fund Contract
   console.log("Fund contract");
-  const fundTx = await dca.deposit({
-    fundingAmount: "50",
-  });
+  const fundTx = await dca.deposit(50);
   await fundTx.wait(1);
 
   await displayBalances(dca, deployer);

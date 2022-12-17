@@ -23,8 +23,8 @@ async function getUsdcBalance() {
     deployer
   );
 
-  const wethBalance = await usdc.balanceOf(walletAddress);
-  console.log(`Got ${wethBalance.toString()} USDC`);
+  const usdcBalance = await usdc.balanceOf(walletAddress);
+  console.log(`Got ${usdcBalance.toString()} USDC`);
 }
 
 main()
