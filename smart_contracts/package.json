@@ -11,6 +11,10 @@
     "@openzeppelin/contracts": "^4.8.0",
     "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "^6.1.2",
+    "@uniswap/v3-core": "^1.0.1",
+    "@uniswap/v3-periphery": "^1.4.3",
+    "@uniswap/v3-sdk": "^3.9.0",
+    "alchemy-sdk": "^2.2.3",
     "chai": "^4.2.0",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
@@ -19,6 +23,7 @@
     "hardhat-deploy": "^0.11.20",
     "hardhat-gas-reporter": "^1.0.8",
     "solidity-coverage": "^0.8.0",
-    "typechain": "^8.1.0"
+    "typechain": "^8.1.0",
+    "web3": "^1.8.1"
   }
 }
