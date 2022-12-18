@@ -8,7 +8,7 @@ const AMOUNT = ethers.utils.parseEther("0.1");
 async function main() {
   const { deployer } = await getNamedAccounts();
 
-  const sampleLog = await ethers.getContract("SampleLog", deployer);
+  const sampleLog = await ethers.getContract("SimpleSwap", deployer);
 
   const wethTokenAddress = networkConfig[network.config.chainId].wethToken;
   const iWeth = await ethers.getContractAt(

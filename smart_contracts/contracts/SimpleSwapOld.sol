@@ -6,7 +6,7 @@ import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "hardhat/console.sol";
 
-contract SampleLog {
+contract SimpleSwapOld {
     ISwapRouter public immutable swapRouter;
     address public constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address public constant WETH9 = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -18,9 +18,10 @@ contract SampleLog {
         swapRouter = _swapRouter;
     }
 
-    function swap(uint256 amountIn) external returns (uint256 amountOut) {
-        console.log("Calling sampleAdd with %o", amountIn);
-
+    function swapWETHForDAI(
+        uint256 amountIn
+    ) external returns (uint256 amountOut) {
+        console.log("Calling fundme");
         // Transfer the specified amount of WETH9 to this contract.
         TransferHelper.safeTransferFrom(
             WETH9,
@@ -28,7 +29,6 @@ contract SampleLog {
             address(this),
             amountIn
         );
-
         // Approve the router to spend WETH9.
         TransferHelper.safeApprove(WETH9, address(swapRouter), amountIn);
         // Note: To use this example, you should explicitly set slippage limits, omitting for simplicity
@@ -49,7 +49,5 @@ contract SampleLog {
         // The call to `exactInputSingle` executes the swap.
         amountOut = swapRouter.exactInputSingle(params);
         emit SwappedFor(amountOut);
-
-        return (2);
     }
 }

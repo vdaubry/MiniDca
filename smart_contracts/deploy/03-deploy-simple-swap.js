@@ -17,36 +17,22 @@ module.exports = async (hre) => {
 
   /***********************************
    *
-   * Deploy Swap contract
+   * Deploy DCA smart contract
    *
    ************************************/
 
   log("---------------------------------");
-  log(`Deploy Swap with owner : ${deployer}`);
+  log(`Deploy Sample with owner : ${deployer}`);
 
   const router_address = networkConfig[network.config.chainId].swapRouter;
 
   const arguments = [router_address];
-  const swap = await deploy("SimpleSwap", {
+  const sampleLog = await deploy("SimpleSwap", {
     from: deployer,
     args: arguments,
     log: true,
     waitConfirmations: waitBlockConfirmations,
   });
-
-  /***********************************
-   *
-   * Verify the deployment
-   *
-   ************************************/
-  if (
-    !developmentChains.includes(network.name) &&
-    process.env.ETHERSCAN_API_KEY
-  ) {
-    log("Verifying...");
-    await verify(swap.address, arguments);
-  }
-  log("----------------------------------------------------");
 };
 
-module.exports.tags = ["all", "swap"];
+module.exports.tags = ["all", "simple-swap"];

@@ -18,10 +18,9 @@ contract SimpleSwap {
         swapRouter = _swapRouter;
     }
 
-    function swapWETHForDAI(
-        uint256 amountIn
-    ) external returns (uint256 amountOut) {
-        console.log("Calling fundme");
+    function swap(uint256 amountIn) external returns (uint256 amountOut) {
+        console.log("Calling sampleAdd with %o", amountIn);
+
         // Transfer the specified amount of WETH9 to this contract.
         TransferHelper.safeTransferFrom(
             WETH9,
@@ -29,6 +28,7 @@ contract SimpleSwap {
             address(this),
             amountIn
         );
+
         // Approve the router to spend WETH9.
         TransferHelper.safeApprove(WETH9, address(swapRouter), amountIn);
         // Note: To use this example, you should explicitly set slippage limits, omitting for simplicity
@@ -49,5 +49,7 @@ contract SimpleSwap {
         // The call to `exactInputSingle` executes the swap.
         amountOut = swapRouter.exactInputSingle(params);
         emit SwappedFor(amountOut);
+
+        return (2);
     }
 }
