@@ -14,12 +14,20 @@ contract SimpleSwap {
 
     event SwappedFor(uint256 amountOut);
 
+    /// @notice Creates a new SimpleSwap contract
+    /// @notice see https://docs.uniswap.org/contracts/v3/reference/deployments
+    /// @param _swapRouter The contract address of the uniswap V3 router
+    /// @param _DAI 'from' token address to swap from
+    /// @param _WETH9 'to' token address to swap to
     constructor(ISwapRouter _swapRouter, address _DAI, address _WETH9) {
         swapRouter = _swapRouter;
         DAI = _DAI;
         WETH9 = _WETH9;
     }
 
+    /// @notice Swaps the specified amount of WETH9 for DAI
+    /// @param amountIn The amount of WETH9 to swap
+    /// @return amountOut The amount of DAI received
     function swap(uint256 amountIn) external returns (uint256 amountOut) {
         console.log("Calling sampleAdd with %o", amountIn);
 
@@ -33,10 +41,11 @@ contract SimpleSwap {
 
         // Approve the router to spend WETH9.
         TransferHelper.safeApprove(WETH9, address(swapRouter), amountIn);
-        // Note: To use this example, you should explicitly set slippage limits, omitting for simplicity
-        uint256 minOut = /* Calculate min output */ 0;
-        uint160 priceLimit = /* Calculate price limit */ 0;
-        // Create the params that will be used to execute the swap
+
+        // TODO: set slippage limits
+        uint256 minOut = 0;
+        uint160 priceLimit = 0;
+
         ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
             .ExactInputSingleParams({
                 tokenIn: WETH9,
@@ -48,7 +57,8 @@ contract SimpleSwap {
                 amountOutMinimum: minOut,
                 sqrtPriceLimitX96: priceLimit
             });
-        // The call to `exactInputSingle` executes the swap.
+
+        // Swap the specified amount of WETH9 for DAI.
         amountOut = swapRouter.exactInputSingle(params);
         emit SwappedFor(amountOut);
 
