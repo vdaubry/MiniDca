@@ -7,6 +7,7 @@ import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "hardhat/console.sol";
 
+error Dca__DepositError();
 error Dca__WithdrawError();
 
 contract Dca {
@@ -46,9 +47,7 @@ contract Dca {
 
     function withdraw() public {
         uint256 amountToWithdraw = s_addressToAmountDeposited[msg.sender];
-        if (amountToWithdraw <= 0) {
-            return;
-        }
+        if (amountToWithdraw <= 0) revert Dca__WithdrawError();
 
         s_addressToAmountDeposited[msg.sender] = 0;
         s_usdc.transfer(msg.sender, amountToWithdraw);
