@@ -8,14 +8,16 @@ import "hardhat/console.sol";
 
 contract SimpleSwap {
     ISwapRouter public immutable swapRouter;
-    address public constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address public constant WETH9 = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public immutable DAI;
+    address public immutable WETH9;
     uint24 public constant feeTier = 3000;
 
     event SwappedFor(uint256 amountOut);
 
-    constructor(ISwapRouter _swapRouter) {
+    constructor(ISwapRouter _swapRouter, address _DAI, address _WETH9) {
         swapRouter = _swapRouter;
+        DAI = _DAI;
+        WETH9 = _WETH9;
     }
 
     function swap(uint256 amountIn) external returns (uint256 amountOut) {
