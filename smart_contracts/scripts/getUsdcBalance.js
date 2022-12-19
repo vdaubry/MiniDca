@@ -13,7 +13,7 @@ async function main() {
 }
 
 async function getUsdcBalance() {
-  const { deployer } = await getNamedAccounts();
+  const deployer = await ethers.getSigner((await getNamedAccounts()).deployer);
 
   const walletAddress = "0x630565882a6d3691Fe32470Ff2981b3289CD9b87";
 

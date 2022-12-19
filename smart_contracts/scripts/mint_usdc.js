@@ -1,3 +1,5 @@
+// hardhat-deploy is a fork of hard-ethers and does not include the getImpersonatedSigner
+
 const fs = require("fs");
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
 const { ethers, network, getNamedAccounts } = require("hardhat");
@@ -13,7 +15,7 @@ const mintUsdc = async () => {
     return;
   }
 
-  const deployer = (await getNamedAccounts()).deployer;
+  const { deployer } = await getNamedAccounts();
 
   const usdcTokenAddress = networkConfig[network.config.chainId].usdcToken;
   const usdcAbi = JSON.parse(
