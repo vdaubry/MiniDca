@@ -8,7 +8,7 @@ const AMOUNT = ethers.utils.parseEther("0.1");
 async function main() {
   const { deployer } = await getNamedAccounts();
 
-  const sampleLog = await ethers.getContract("SimpleSwap", deployer);
+  const simpleSwap = await ethers.getContract("SimpleSwap", deployer);
 
   const wethTokenAddress = networkConfig[network.config.chainId].wethToken;
   const iWeth = await ethers.getContractAt(
@@ -25,13 +25,13 @@ async function main() {
   );
 
   await getWeth(ethers.utils.parseEther("1"), deployer);
-  await iWeth.approve(sampleLog.address, ethers.constants.MaxInt256);
+  await iWeth.approve(simpleSwap.address, ethers.constants.MaxInt256);
 
-  const tx = await sampleLog.swap(AMOUNT, wethTokenAddress, daiTokenAddress);
+  const tx = await simpleSwap.swap(AMOUNT, wethTokenAddress, daiTokenAddress);
   await tx.wait(1);
 
   const contractWethBalance = ethers.utils.formatEther(
-    await iWeth.balanceOf(sampleLog.address)
+    await iWeth.balanceOf(simpleSwap.address)
   );
   console.log(`Contract balance : ${contractWethBalance.toString()} WETH`);
 

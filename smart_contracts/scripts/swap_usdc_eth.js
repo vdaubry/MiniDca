@@ -1,14 +1,20 @@
 const { ethers, getNamedAccounts } = require("hardhat");
 const { getAbi } = require("./getAbi");
-const { getWeth } = require("./getUsdc");
 const { networkConfig } = require("../helper-hardhat-config");
 
-const AMOUNT = ethers.utils.parseEther("0.1");
+const AMOUNT = ethers.utils.parseUnits("100", 6);
 
 async function main() {
   const { deployer } = await getNamedAccounts();
 
-  const sampleLog = await ethers.getContract("SimpleSwap", deployer);
+  const simpleSwap = await ethers.getContract("SimpleSwap", deployer);
+
+  const usdcTokenAddress = networkConfig[network.config.chainId].usdcToken;
+  const usdc = await ethers.getContractAt(
+    "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+    usdcTokenAddress,
+    deployer
+  );
 
   const wethTokenAddress = networkConfig[network.config.chainId].wethToken;
   const iWeth = await ethers.getContractAt(
@@ -17,28 +23,20 @@ async function main() {
     deployer
   );
 
-  const usdcTokenAddress = networkConfig[network.config.chainId].usdcToken;
-  const dai = await ethers.getContractAt(
-    "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-    usdcTokenAddress,
-    deployer
-  );
+  await usdc.approve(simpleSwap.address, ethers.constants.MaxInt256);
 
-  await getUSDC(ethers.utils.parseEther("1"), deployer);
-  await iWeth.approve(sampleLog.address, ethers.constants.MaxInt256);
-
-  const tx = await sampleLog.swap(AMOUNT, wethTokenAddress, daiTokenAddress);
+  const tx = await simpleSwap.swap(AMOUNT, usdcTokenAddress, wethTokenAddress);
   await tx.wait(1);
 
-  const contractWethBalance = ethers.utils.formatEther(
-    await iWeth.balanceOf(sampleLog.address)
+  const contractUsdcBalance = ethers.utils.formatEther(
+    await usdc.balanceOf(simpleSwap.address)
   );
-  console.log(`Contract balance : ${contractWethBalance.toString()} WETH`);
+  console.log(`Contract balance : ${contractUsdcBalance.toString()} USDC`);
 
-  const deployerDaiBalance = ethers.utils.formatEther(
-    await dai.balanceOf(deployer)
+  const deployerWethBalance = ethers.utils.formatEther(
+    await iWeth.balanceOf(deployer)
   );
-  console.log(`Deployer Dai balance : ${deployerDaiBalance.toString()} DAI`);
+  console.log(`Deployer WETH balance : ${deployerWethBalance.toString()} WETH`);
 }
 
 main()

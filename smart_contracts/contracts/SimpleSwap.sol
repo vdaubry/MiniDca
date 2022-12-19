@@ -31,6 +31,18 @@ contract SimpleSwap {
     ) external returns (uint256 amountOut) {
         console.log("Calling sampleAdd with %o", amountIn);
 
+        require(amountIn > 0, "amountIn must be greater than 0");
+
+        require(
+            IERC20(tokenA).balanceOf(msg.sender) >= amountIn,
+            "Swap: Insufficient balance"
+        );
+
+        require(
+            IERC20(tokenA).allowance(msg.sender, address(this)) >= amountIn,
+            "Swap: Insufficient allowance"
+        );
+
         // Transfer the specified amount of tokenA to this contract.
         TransferHelper.safeTransferFrom(
             tokenA,
