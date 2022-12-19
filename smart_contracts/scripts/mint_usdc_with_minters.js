@@ -1,7 +1,3 @@
-// This script only works with "ethers.getImpersonatedSigner"
-// See : https://hardhat.org/hardhat-network/docs/guides/forking-other-networks#impersonating-accounts
-// Issue opened : https://github.com/wighawag/hardhat-deploy-ethers/issues/31
-
 const fs = require("fs");
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
 const { ethers, network, getNamedAccounts } = require("hardhat");
@@ -31,7 +27,8 @@ const mintUsdc = async () => {
   );
 
   const usdcOwner = await usdc.owner();
-  const impersonatedUsdcOwner = await ethers.getImpersonatedSigner(usdcOwner);
+  await helpers.impersonateAccount(usdcOwner);
+  const impersonatedUsdcOwner = await ethers.getSigner(usdcOwner);
   const connectedUsdcOwner = await usdc.connect(impersonatedUsdcOwner);
 
   const updateMasterTx = await connectedUsdcOwner.updateMasterMinter(deployer);
