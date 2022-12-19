@@ -1,3 +1,7 @@
+// This script only works with "ethers.getImpersonatedSigner"
+// See : https://hardhat.org/hardhat-network/docs/guides/forking-other-networks#impersonating-accounts
+// Issue opened : https://github.com/wighawag/hardhat-deploy-ethers/issues/31
+
 const fs = require("fs");
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
 const { ethers, network, getNamedAccounts } = require("hardhat");
