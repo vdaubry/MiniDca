@@ -25,10 +25,8 @@ module.exports = async (hre) => {
   log(`Deploy Sample with owner : ${deployer}`);
 
   const router_address = networkConfig[network.config.chainId].swapRouter;
-  const dai_address = networkConfig[network.config.chainId].daiToken;
-  const weth_address = networkConfig[network.config.chainId].wethToken;
 
-  const arguments = [router_address, dai_address, weth_address];
+  const arguments = [router_address];
   const sampleLog = await deploy("SimpleSwap", {
     from: deployer,
     args: arguments,

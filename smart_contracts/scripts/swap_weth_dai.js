@@ -27,7 +27,7 @@ async function main() {
   await getWeth(ethers.utils.parseEther("1"), deployer);
   await iWeth.approve(sampleLog.address, ethers.constants.MaxInt256);
 
-  const tx = await sampleLog.swap(AMOUNT);
+  const tx = await sampleLog.swap(AMOUNT, wethTokenAddress, daiTokenAddress);
   await tx.wait(1);
 
   const contractWethBalance = ethers.utils.formatEther(
