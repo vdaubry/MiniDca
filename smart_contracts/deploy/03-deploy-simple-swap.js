@@ -17,12 +17,12 @@ module.exports = async (hre) => {
 
   /***********************************
    *
-   * Deploy DCA smart contract
+   * Deploy SimpleSwap smart contract
    *
    ************************************/
 
   log("---------------------------------");
-  log(`Deploy Sample with owner : ${deployer}`);
+  log(`Deploy SimpleSwap with owner : ${deployer}`);
 
   const router_address = networkConfig[network.config.chainId].swapRouter;
 

@@ -116,7 +116,7 @@ const { developmentChains } = require("../../helper-hardhat-config");
         it("returns true if interval has passed", async () => {
           await prepareUpkeep();
 
-          const { upkeepNeeded } = await dca.checkUpkeep([]);
+          const { upkeepNeeded } = await dca.callStatic.checkUpkeep([]);
 
           assert.equal(upkeepNeeded.toString(), "true");
         });
@@ -124,7 +124,7 @@ const { developmentChains } = require("../../helper-hardhat-config");
         it("returns false if interval has not passed", async () => {
           await dca.deposit(50);
 
-          const { upkeepNeeded } = await dca.checkUpkeep([]);
+          const { upkeepNeeded } = await dca.callStatic.checkUpkeep([]);
 
           assert.equal(upkeepNeeded.toString(), "false");
         });
