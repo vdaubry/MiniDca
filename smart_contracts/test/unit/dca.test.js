@@ -17,7 +17,7 @@ const { developmentChains } = require("../../helper-hardhat-config");
 
         const mintTx = await usdc.mint(
           deployer,
-          ethers.utils.parseUnits("100", 6)
+          ethers.utils.parseUnits("1000", 6)
         );
         await mintTx.wait(1);
 
@@ -131,17 +131,23 @@ const { developmentChains } = require("../../helper-hardhat-config");
       });
 
       describe("performUpkeep", () => {
-        it("increase counter", async () => {
-          const initialCounter = await dca.getCounter();
+        it.only("swaps assets", async () => {
+          await dca.deposit(150);
+
+          const dcaBalance = await usdc.balanceOf(dca.address);
+          assert.equal(
+            dcaBalance.toString(),
+            ethers.utils.parseUnits("150", 6)
+          );
 
           await prepareUpkeep();
+
           await dca.performUpkeep([]);
 
-          const finalCounter = await dca.getCounter();
-
+          const finalDcaBalance = await usdc.balanceOf(dca.address);
           assert.equal(
-            finalCounter.toString(),
-            initialCounter.add(1).toString()
+            finalDcaBalance.toString(),
+            ethers.utils.parseUnits("50", 6)
           );
         });
 

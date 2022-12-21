@@ -29,7 +29,9 @@ module.exports = async (hre) => {
     ? (await ethers.getContract("Usdc", deployer)).address
     : USDC_CONTRACT_ADRESSES[chainId]["address"];
 
-  const arguments = [usdc_address, KEEPERS_UPDATE_INTERVAL];
+  const swapper_address = (await ethers.getContract("SimpleSwap", deployer))
+    .address;
+  const arguments = [usdc_address, KEEPERS_UPDATE_INTERVAL, swapper_address];
   const dca = await deploy("Dca", {
     from: deployer,
     args: arguments,

@@ -17,16 +17,18 @@ contract Dca is AutomationCompatibleInterface {
 
     uint public immutable keepersUpdateInterval;
     uint public lastTimeStamp;
-    uint public counter;
 
-    //SimpleSwap immutable swapper;
+    SimpleSwap immutable swapper;
 
-    constructor(address usdcAddress, uint _keepersUpdateInterval) {
+    constructor(
+        address usdcAddress,
+        uint _keepersUpdateInterval,
+        address _swapperAddress
+    ) {
         s_usdc = IERC20(usdcAddress);
         keepersUpdateInterval = _keepersUpdateInterval;
         lastTimeStamp = block.timestamp;
-
-        counter = 0;
+        swapper = SimpleSwap(_swapperAddress);
     }
 
     function deposit(uint256 depositAmount) public {
@@ -74,7 +76,13 @@ contract Dca is AutomationCompatibleInterface {
         if (!upkeepNeeded) revert Dca__UpkeepNotNeeded();
 
         lastTimeStamp = block.timestamp;
-        counter = counter + 1;
+
+        address usdc = address(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+        address weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+
+        uint256 amountToSwap = 100_000000;
+        IERC20(usdc).approve(address(swapper), amountToSwap);
+        swapper.swap(amountToSwap, usdc, weth);
     }
 
     function getAmountInvestedForAddress(
@@ -85,9 +93,5 @@ contract Dca is AutomationCompatibleInterface {
 
     function getKeepersUpdateInterval() public view returns (uint) {
         return keepersUpdateInterval;
-    }
-
-    function getCounter() public view returns (uint) {
-        return counter;
     }
 }
