@@ -14,6 +14,7 @@ module.exports = async (hre) => {
     ? 1
     : VERIFICATION_BLOCK_CONFIRMATIONS;
   const chainId = network.config.chainId;
+  const KEEPERS_UPDATE_INTERVAL = "60"; // 24 seconds
 
   /***********************************
    *
@@ -28,10 +29,7 @@ module.exports = async (hre) => {
     ? (await ethers.getContract("Usdc", deployer)).address
     : USDC_CONTRACT_ADRESSES[chainId]["address"];
 
-  const arguments = [
-    usdc_address,
-    "0x0000000000000000000000000000000000000000",
-  ];
+  const arguments = [usdc_address, KEEPERS_UPDATE_INTERVAL];
   const dca = await deploy("Dca", {
     from: deployer,
     args: arguments,

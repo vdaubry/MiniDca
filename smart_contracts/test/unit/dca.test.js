@@ -5,9 +5,7 @@ const { developmentChains } = require("../../helper-hardhat-config");
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("dca", () => {
-      let deployer;
-      let user;
-      let dca;
+      let deployer, user, dca, interval;
 
       beforeEach(async () => {
         await deployments.fixture(["all"]);
@@ -15,6 +13,7 @@ const { developmentChains } = require("../../helper-hardhat-config");
         user = (await getNamedAccounts()).user;
         dca = await ethers.getContract("Dca", deployer);
         usdc = await ethers.getContract("Usdc", deployer);
+        interval = await dca.getKeepersUpdateInterval();
 
         const mintTx = await usdc.mint(
           deployer,
@@ -96,10 +95,61 @@ const { developmentChains } = require("../../helper-hardhat-config");
           const signer = await ethers.getSigner(user);
           const conectedUserDca = await dca.connect(signer);
 
-          await conectedUserDca.withdraw();
+          await expect(
+            conectedUserDca.withdraw()
+          ).to.be.revertedWithCustomError(
+            conectedUserDca,
+            "Dca__WithdrawError"
+          );
 
           const dcaBalance = await usdc.balanceOf(dca.address);
           assert.equal(dcaBalance.toString(), ethers.utils.parseUnits("50", 6));
+        });
+      });
+
+      const prepareUpkeep = async () => {
+        await ethers.provider.send("evm_increaseTime", [interval.toNumber()]);
+        await network.provider.send("evm_mine", []);
+      };
+
+      describe("checkUpKeep", () => {
+        it("returns true if interval has passed", async () => {
+          await prepareUpkeep();
+
+          const { upkeepNeeded } = await dca.checkUpkeep([]);
+
+          assert.equal(upkeepNeeded.toString(), "true");
+        });
+
+        it("returns false if interval has not passed", async () => {
+          await dca.deposit(50);
+
+          const { upkeepNeeded } = await dca.checkUpkeep([]);
+
+          assert.equal(upkeepNeeded.toString(), "false");
+        });
+      });
+
+      describe("performUpkeep", () => {
+        it("increase counter", async () => {
+          const initialCounter = await dca.getCounter();
+
+          await prepareUpkeep();
+          await dca.performUpkeep([]);
+
+          const finalCounter = await dca.getCounter();
+
+          assert.equal(
+            finalCounter.toString(),
+            initialCounter.add(1).toString()
+          );
+        });
+
+        it("fails if interval has not passed", async () => {
+          await expect(dca.performUpkeep([])).to.be.revertedWithCustomError(
+            dca,
+            "Dca__UpkeepNotNeeded"
+          );
         });
       });
     });
