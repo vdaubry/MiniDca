@@ -9,7 +9,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("dca", () => {
-      let deployer, user, dca, interval, usdc;
+      let deployer, user, dca, interval, usdc, weth;
 
       beforeEach(async () => {
         await deployments.fixture(["all"]);
@@ -24,6 +24,15 @@ const { mintUsdc } = require("../../utils/mintUsdc");
           usdcTokenAddress,
           deployer
         );
+
+        const wethTokenAddress =
+          networkConfig[network.config.chainId].wethToken;
+        weth = await ethers.getContractAt(
+          "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+          wethTokenAddress,
+          deployer
+        );
+
         interval = await dca.getKeepersUpdateInterval();
 
         await mintUsdc(deployer);
@@ -141,24 +150,27 @@ const { mintUsdc } = require("../../utils/mintUsdc");
         it.only("swaps assets", async () => {
           await dca.deposit(150);
 
-          const dcaBalance = await usdc.balanceOf(dca.address);
-
-          console.log("dca balance", dcaBalance.toString());
-
+          const initialDcaUsdcBalance = await usdc.balanceOf(dca.address);
           assert.equal(
-            dcaBalance.toString(),
+            initialDcaUsdcBalance.toString(),
             ethers.utils.parseUnits("150", 6)
           );
+
+          const initialDcaWethBalance = await weth.balanceOf(dca.address);
+          assert.equal(initialDcaWethBalance.toString(), "0");
 
           await prepareUpkeep();
 
           await dca.performUpkeep([]);
 
-          const finalDcaBalance = await usdc.balanceOf(dca.address);
+          const finalDcaUsdcBalance = await usdc.balanceOf(dca.address);
           assert.equal(
-            finalDcaBalance.toString(),
+            finalDcaUsdcBalance.toString(),
             ethers.utils.parseUnits("50", 6)
           );
+
+          const finalDcaWethBalance = await usdc.balanceOf(weth.address);
+          assert.isAbove(finalDcaWethBalance, 0);
         });
 
         it("fails if interval has not passed", async () => {

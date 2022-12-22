@@ -29,16 +29,13 @@ contract SimpleSwap {
         address tokenA,
         address tokenB
     ) external returns (uint256 amountOut) {
-        console.log("Calling sampleAdd with %o", amountIn);
-
-        require(amountIn > 0, "amountIn must be greater than 0");
-
         console.log(
-            "msg.sender : %o ; tokenA : %o, balance: %o",
+            "Calling swap with msg.sender : %o ; tokenA : %o, balance: %o",
             msg.sender,
             tokenA,
             IERC20(tokenA).balanceOf(msg.sender)
         );
+        require(amountIn > 0, "amountIn must be greater than 0");
 
         require(
             IERC20(tokenA).balanceOf(msg.sender) >= amountIn,
