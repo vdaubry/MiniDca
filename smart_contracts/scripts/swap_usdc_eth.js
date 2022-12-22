@@ -1,5 +1,4 @@
 const { ethers, getNamedAccounts } = require("hardhat");
-const { getAbi } = require("./getAbi");
 const { networkConfig } = require("../helper-hardhat-config");
 
 const AMOUNT = ethers.utils.parseUnits("100", 6);

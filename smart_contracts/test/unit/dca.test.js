@@ -1,25 +1,32 @@
 const { assert, expect } = require("chai");
 const { deployments, ethers, getNamedAccounts } = require("hardhat");
-const { developmentChains } = require("../../helper-hardhat-config");
+const {
+  developmentChains,
+  networkConfig,
+} = require("../../helper-hardhat-config");
+const { mintUsdc } = require("../../utils/mintUsdc");
 
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("dca", () => {
-      let deployer, user, dca, interval;
+      let deployer, user, dca, interval, usdc;
 
       beforeEach(async () => {
         await deployments.fixture(["all"]);
         deployer = (await getNamedAccounts()).deployer;
         user = (await getNamedAccounts()).user;
         dca = await ethers.getContract("Dca", deployer);
-        usdc = await ethers.getContract("Usdc", deployer);
+
+        const usdcTokenAddress =
+          networkConfig[network.config.chainId].usdcToken;
+        usdc = await ethers.getContractAt(
+          "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+          usdcTokenAddress,
+          deployer
+        );
         interval = await dca.getKeepersUpdateInterval();
 
-        const mintTx = await usdc.mint(
-          deployer,
-          ethers.utils.parseUnits("1000", 6)
-        );
-        await mintTx.wait(1);
+        await mintUsdc(deployer);
 
         await usdc.approve(dca.address, ethers.constants.MaxInt256);
       });
@@ -135,6 +142,9 @@ const { developmentChains } = require("../../helper-hardhat-config");
           await dca.deposit(150);
 
           const dcaBalance = await usdc.balanceOf(dca.address);
+
+          console.log("dca balance", dcaBalance.toString());
+
           assert.equal(
             dcaBalance.toString(),
             ethers.utils.parseUnits("150", 6)

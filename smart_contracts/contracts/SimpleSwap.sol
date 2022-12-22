@@ -33,6 +33,13 @@ contract SimpleSwap {
 
         require(amountIn > 0, "amountIn must be greater than 0");
 
+        console.log(
+            "msg.sender : %o ; tokenA : %o, balance: %o",
+            msg.sender,
+            tokenA,
+            IERC20(tokenA).balanceOf(msg.sender)
+        );
+
         require(
             IERC20(tokenA).balanceOf(msg.sender) >= amountIn,
             "Swap: Insufficient balance"

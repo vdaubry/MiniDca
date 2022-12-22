@@ -2,7 +2,7 @@ const { network, ethers } = require("hardhat");
 const {
   developmentChains,
   VERIFICATION_BLOCK_CONFIRMATIONS,
-  USDC_CONTRACT_ADRESSES,
+  networkConfig,
 } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 
@@ -25,13 +25,14 @@ module.exports = async (hre) => {
   log("---------------------------------");
   log(`Deploy Dca with owner : ${deployer}`);
 
-  const usdc_address = developmentChains.includes(network.name)
-    ? (await ethers.getContract("Usdc", deployer)).address
-    : USDC_CONTRACT_ADRESSES[chainId]["address"];
-
+  const usdcTokenAddress = networkConfig[chainId].usdcToken;
   const swapper_address = (await ethers.getContract("SimpleSwap", deployer))
     .address;
-  const arguments = [usdc_address, KEEPERS_UPDATE_INTERVAL, swapper_address];
+  const arguments = [
+    usdcTokenAddress,
+    KEEPERS_UPDATE_INTERVAL,
+    swapper_address,
+  ];
   const dca = await deploy("Dca", {
     from: deployer,
     args: arguments,

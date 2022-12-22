@@ -1,7 +1,6 @@
 const fs = require("fs");
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
 const { ethers, network, getNamedAccounts } = require("hardhat");
-const { getAbi } = require("./getAbi");
 const {
   developmentChains,
   networkConfig,
@@ -19,11 +18,11 @@ const mintUsdc = async (receiverAddress) => {
   const usdcAbi = JSON.parse(
     fs.readFileSync("./utils/abis/usdc_abi.json", "utf8")
   );
-  const deployerSigner = await ethers.getSigner(receiverAddress);
+  const receiverSigner = await ethers.getSigner(receiverAddress);
   const usdc = await ethers.getContractAt(
     usdcAbi,
     usdcTokenAddress,
-    deployerSigner
+    receiverSigner
   );
 
   const usdcOwner = await usdc.owner();
@@ -31,12 +30,19 @@ const mintUsdc = async (receiverAddress) => {
   const impersonatedUsdcOwner = await ethers.getSigner(usdcOwner);
   const connectedUsdcOwner = await usdc.connect(impersonatedUsdcOwner);
 
+  // Send ETH to the owner so it can pay for the gas
+  const tx = await receiverSigner.sendTransaction({
+    to: usdcOwner,
+    value: ethers.utils.parseEther("10.0"),
+  });
+  tx.wait(1);
+
   const updateMasterTx = await connectedUsdcOwner.updateMasterMinter(
     receiverAddress
   );
   await updateMasterTx.wait(1);
 
-  const connectedUsdcMinter = await usdc.connect(deployerSigner);
+  const connectedUsdcMinter = await usdc.connect(receiverSigner);
 
   const configureMinterTx = await connectedUsdcMinter.configureMinter(
     receiverAddress,
@@ -54,17 +60,5 @@ const mintUsdc = async (receiverAddress) => {
   );
   console.log(`Got ${usdcBalance.toString()} USDC`);
 };
-
-async function main() {
-  const deployer = (await getNamedAccounts()).deployer;
-  await mintUsdc(deployer);
-}
-
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
 
 module.exports = { mintUsdc };
