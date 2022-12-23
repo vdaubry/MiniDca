@@ -2,7 +2,7 @@
 pragma solidity ^0.8.7;
 
 import "./SimpleSwap.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
 import "hardhat/console.sol";
 
@@ -12,6 +12,15 @@ error Dca__UpkeepNotNeeded();
 
 contract Dca is AutomationCompatibleInterface {
     mapping(address => uint256) s_addressToAmountDeposited;
+    mapping(address => InvestConfig) s_addressToInvestConfig;
+    address[] s_investors;
+
+    struct InvestConfig {
+        address tokenToBuy;
+        uint256 amountToBuy;
+        uint256 buyInterval;
+        uint256 nextBuyTimestamp;
+    }
 
     IERC20 private s_usdc;
 
@@ -21,17 +30,24 @@ contract Dca is AutomationCompatibleInterface {
     SimpleSwap immutable swapper;
 
     constructor(
-        address usdcAddress,
+        address _usdcAddress,
         uint _keepersUpdateInterval,
         address _swapperAddress
     ) {
-        s_usdc = IERC20(usdcAddress);
+        s_usdc = IERC20(_usdcAddress);
         keepersUpdateInterval = _keepersUpdateInterval;
         lastTimeStamp = block.timestamp;
         swapper = SimpleSwap(_swapperAddress);
+        s_investors = new address[](0);
+        s_usdc.approve(address(swapper), type(uint256).max);
     }
 
-    function deposit(uint256 depositAmount) public {
+    function deposit(
+        uint256 depositAmount,
+        address tokenToBuyAddress,
+        uint256 amountToBuy,
+        uint256 buyInterval
+    ) public {
         console.log("Calling deposit");
         require(depositAmount > 0, "deposit: Amount must be greater than zero");
         require(
@@ -49,6 +65,20 @@ contract Dca is AutomationCompatibleInterface {
             "deposit: transferFrom failed"
         );
         s_addressToAmountDeposited[msg.sender] += formatedDepositAmount;
+
+        uint256 nextBuyTimestamp = block.timestamp + buyInterval;
+        ERC20 tokenToBuy = ERC20(tokenToBuyAddress);
+        amountToBuy = amountToBuy * 10 ** tokenToBuy.decimals();
+        InvestConfig memory investConfig = InvestConfig(
+            tokenToBuyAddress,
+            amountToBuy,
+            buyInterval,
+            nextBuyTimestamp
+        );
+        s_addressToInvestConfig[msg.sender] = investConfig;
+
+        //todo : if an investor deposit again, we should not add it again to the investor list
+        s_investors.push(msg.sender);
     }
 
     function withdraw() public {
@@ -56,6 +86,10 @@ contract Dca is AutomationCompatibleInterface {
         if (amountToWithdraw <= 0) revert Dca__WithdrawError();
 
         s_addressToAmountDeposited[msg.sender] = 0;
+
+        //Todo : find a way to remove an element from an array
+        //s_investors = remove(s_investors, msg.sender);
+
         s_usdc.transfer(msg.sender, amountToWithdraw);
     }
 
@@ -77,12 +111,28 @@ contract Dca is AutomationCompatibleInterface {
 
         lastTimeStamp = block.timestamp;
 
-        address usdc = address(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-        address weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+        for (uint i = 0; i < s_investors.length; i++) {
+            address investor = s_investors[i];
+            InvestConfig memory investConfig = s_addressToInvestConfig[
+                investor
+            ];
 
-        uint256 amountToSwap = 100_000000;
-        IERC20(usdc).approve(address(swapper), amountToSwap);
-        swapper.swap(amountToSwap, usdc, weth);
+            if (investConfig.nextBuyTimestamp > block.timestamp) {
+                uint256 amountToSwap = investConfig.amountToBuy;
+
+                swapper.swap(
+                    amountToSwap,
+                    address(s_usdc),
+                    investConfig.tokenToBuy
+                );
+
+                // todo: check if swap was successful
+                // todo: update nextBuyTimestamp
+                // todo: decrease s_addressToAmountDeposited
+                // todo: if s_addressToAmountDeposited is 0, remove investor from s_investors
+                // todo: if s_addressToAmountDeposited < amountToSwap, swap only what is left
+            }
+        }
     }
 
     function getAmountInvestedForAddress(
