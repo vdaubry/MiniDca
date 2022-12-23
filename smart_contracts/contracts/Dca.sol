@@ -192,6 +192,30 @@ contract Dca is AutomationCompatibleInterface {
         return s_addressToInvestConfig[investor].amountDeposited;
     }
 
+    function getTokenToBuyForAddress(
+        address investor
+    ) public view returns (address) {
+        return s_addressToInvestConfig[investor].tokenToBuy;
+    }
+
+    function getBuyIntervalForAddress(
+        address investor
+    ) public view returns (uint256) {
+        return s_addressToInvestConfig[investor].buyInterval;
+    }
+
+    function getNextBuyTimestampForAddress(
+        address investor
+    ) public view returns (uint256) {
+        return s_addressToInvestConfig[investor].nextBuyTimestamp;
+    }
+
+    function getAmounToBuyForAddress(
+        address investor
+    ) public view returns (uint256) {
+        return s_addressToInvestConfig[investor].amountToBuy;
+    }
+
     function getKeepersUpdateInterval() public view returns (uint) {
         return keepersUpdateInterval;
     }

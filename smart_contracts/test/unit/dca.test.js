@@ -62,7 +62,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
           assert.equal(amountInvestedUser.toString(), "0");
         });
 
-        it.only("transfers funds from user to contract", async () => {
+        it("transfers funds from user to contract", async () => {
           const startDcaBalance = await usdc.balanceOf(dca.address);
           assert.equal(startDcaBalance.toString(), "0");
 
@@ -82,6 +82,34 @@ const { mintUsdc } = require("../../utils/mintUsdc");
 
           const finalDcaBalance = await usdc.balanceOf(dca.address);
           assert.equal(ethers.utils.formatUnits(finalDcaBalance, 6), 50.0);
+        });
+
+        it("sets invest config", async () => {
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
+
+          const tokenToBuy = await dca.getTokenToBuyForAddress(deployer);
+          assert.equal(tokenToBuy.toString(), weth.address);
+
+          const buyInterval = await dca.getBuyIntervalForAddress(deployer);
+          assert.equal(buyInterval.toString(), BUY_INTERVAL);
+
+          const amountToBuy = await dca.getAmounToBuyForAddress(deployer);
+          assert.equal(ethers.utils.formatUnits(amountToBuy, 18), 10);
+        });
+
+        it("sets nextBuyTimestamp", async () => {
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
+
+          const block = await ethers.provider.send("eth_getBlockByNumber", [
+            "latest",
+            false,
+          ]);
+          const timestamp = parseInt(block.timestamp, 16);
+
+          const nextBuyTimestamp = await dca.getNextBuyTimestampForAddress(
+            deployer
+          );
+          assert.equal(nextBuyTimestamp, (timestamp + BUY_INTERVAL).toString());
         });
       });
 
