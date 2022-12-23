@@ -41,6 +41,8 @@ const { mintUsdc } = require("../../utils/mintUsdc");
       });
 
       describe("deposit", () => {
+        //TODO: Add test for the case where an investor deposit more than once with different configurations
+
         it("sets deposited amount", async () => {
           await dca.deposit(50);
 
@@ -147,7 +149,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
       });
 
       describe("performUpkeep", () => {
-        it.only("swaps assets", async () => {
+        it("swaps assets", async () => {
           await dca.deposit(150);
 
           const initialDcaUsdcBalance = await usdc.balanceOf(dca.address);

@@ -20,6 +20,8 @@ contract Dca is AutomationCompatibleInterface {
         uint256 buyInterval;
         uint256 nextBuyTimestamp;
         uint256 amountDeposited;
+        uint index;
+        bool exists;
     }
 
     IERC20 private s_usdc;
@@ -29,7 +31,7 @@ contract Dca is AutomationCompatibleInterface {
 
     SimpleSwap immutable swapper;
 
-    uint256 public constant USDC_DECIMALS = 6;
+    uint public constant USDC_DECIMALS = 6;
 
     constructor(
         address _usdcAddress,
@@ -67,20 +69,23 @@ contract Dca is AutomationCompatibleInterface {
             "deposit: transferFrom failed"
         );
 
+        //todo : if an investor deposit again, we should not add it again to the investor list
+        s_investors.push(msg.sender);
+
         uint256 nextBuyTimestamp = block.timestamp + buyInterval;
         ERC20 tokenToBuy = ERC20(tokenToBuyAddress);
         amountToBuy = amountToBuy * 10 ** tokenToBuy.decimals();
+        uint256 index = s_investors.length - 1;
         InvestConfig memory investConfig = InvestConfig(
             tokenToBuyAddress,
             amountToBuy,
             buyInterval,
             nextBuyTimestamp,
-            formatedDepositAmount
+            formatedDepositAmount,
+            index,
+            true
         );
         s_addressToInvestConfig[msg.sender] = investConfig;
-
-        //todo : if an investor deposit again, we should not add it again to the investor list
-        s_investors.push(msg.sender);
     }
 
     function withdraw() public {
@@ -95,6 +100,32 @@ contract Dca is AutomationCompatibleInterface {
         //s_investors = remove(s_investors, msg.sender);
 
         s_usdc.transfer(msg.sender, amountToWithdraw);
+    }
+
+    //todo: add unit tests
+    /// @notice remove an investor from investors array
+    /// @dev first we swap the last element of the array with the element to remove
+    /// @dev then we remove the last element of the array
+    /// @param addressToDelete the address of the investor to remove
+    /// @return true if the investor was removed
+    function deleteAddress(address addressToDelete) internal returns (bool) {
+        InvestConfig memory investConfig = s_addressToInvestConfig[
+            addressToDelete
+        ];
+
+        require(investConfig.exists, "Investor does not exist");
+        require(
+            investConfig.amountDeposited <= 0,
+            "Cannot remove an investor with a positive balance"
+        );
+
+        if (investConfig.index != s_investors.length - 1) {
+            address lastAddress = s_investors[s_investors.length - 1];
+            s_investors[investConfig.index] = lastAddress;
+            s_addressToInvestConfig[lastAddress].index = investConfig.index;
+        }
+        s_investors.pop();
+        return true;
     }
 
     function checkUpkeep(
