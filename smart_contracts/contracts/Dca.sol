@@ -219,4 +219,9 @@ contract Dca is AutomationCompatibleInterface {
     function getKeepersUpdateInterval() public view returns (uint) {
         return keepersUpdateInterval;
     }
+
+    function isInvestor(address investor) public view returns (bool) {
+        uint256 index = s_addressToInvestConfig[investor].index;
+        return s_investors[index] == investor;
+    }
 }

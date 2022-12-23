@@ -91,7 +91,6 @@ const { mintUsdc } = require("../../utils/mintUsdc");
           assert.equal(tokenToBuy.toString(), weth.address);
 
           const buyInterval = await dca.getBuyIntervalForAddress(deployer);
-          assert.equal(buyInterval.toString(), BUY_INTERVAL);
 
           const amountToBuy = await dca.getAmounToBuyForAddress(deployer);
           assert.equal(ethers.utils.formatUnits(amountToBuy, 18), 10);
@@ -110,6 +109,13 @@ const { mintUsdc } = require("../../utils/mintUsdc");
             deployer
           );
           assert.equal(nextBuyTimestamp, (timestamp + BUY_INTERVAL).toString());
+        });
+
+        it.only("adds depositor to investor list", async () => {
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
+
+          const isInvestor = await dca.isInvestor(deployer);
+          assert.equal(isInvestor, true);
         });
       });
 
