@@ -3,6 +3,7 @@ pragma solidity ^0.8.7;
 
 import "./SimpleSwap.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
 import "hardhat/console.sol";
 
@@ -96,8 +97,7 @@ contract Dca is AutomationCompatibleInterface {
 
         s_addressToInvestConfig[msg.sender].amountDeposited = 0;
 
-        //Todo : find a way to remove an element from an array
-        //s_investors = remove(s_investors, msg.sender);
+        deleteAddress(msg.sender);
 
         s_usdc.transfer(msg.sender, amountToWithdraw);
     }
@@ -153,7 +153,10 @@ contract Dca is AutomationCompatibleInterface {
             ];
 
             if (investConfig.nextBuyTimestamp > block.timestamp) {
-                uint256 amountToSwap = investConfig.amountToBuy;
+                uint256 amountToSwap = Math.min(
+                    investConfig.amountToBuy,
+                    investConfig.amountDeposited
+                );
 
                 swapper.swap(
                     amountToSwap,
@@ -161,11 +164,19 @@ contract Dca is AutomationCompatibleInterface {
                     investConfig.tokenToBuy
                 );
 
-                // todo: update nextBuyTimestamp
-                // todo: decrease s_addressToAmountDeposited
-                // todo: if s_addressToAmountDeposited is 0, remove investor from s_investors
-                // todo: if s_addressToAmountDeposited < amountToSwap, swap only what is left
-                // todo: check if swap was successful + retry ?
+                s_addressToInvestConfig[investor]
+                    .amountDeposited -= amountToSwap;
+
+                if (s_addressToInvestConfig[investor].amountDeposited <= 0) {
+                    deleteAddress(investor);
+                } else {
+                    s_addressToInvestConfig[investor].nextBuyTimestamp =
+                        block.timestamp +
+                        investConfig.buyInterval;
+                }
+
+                // todo: check if swap was successful => if not dont update s_addressToInvestConfig
+                // todo: retry ?
             }
         }
     }
