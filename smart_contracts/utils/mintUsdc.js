@@ -6,9 +6,7 @@ const {
   networkConfig,
 } = require("../helper-hardhat-config");
 
-const AMOUNT = ethers.utils.parseUnits("1000", 6);
-
-const mintUsdc = async (receiverAddress) => {
+const mintUsdc = async (receiverAddress, amount) => {
   // We can only mint USDC locally
   if (!developmentChains.includes(network.name)) {
     return;
@@ -51,7 +49,7 @@ const mintUsdc = async (receiverAddress) => {
   await configureMinterTx.wait(1);
 
   console.log("Mint Usdc for deployer");
-  const mintTx = await connectedUsdcMinter.mint(receiverAddress, AMOUNT);
+  const mintTx = await connectedUsdcMinter.mint(receiverAddress, amount);
   await mintTx.wait(1);
 
   const usdcBalance = ethers.utils.formatUnits(
@@ -59,6 +57,8 @@ const mintUsdc = async (receiverAddress) => {
     6
   );
   console.log(`Got ${usdcBalance.toString()} USDC`);
+
+  return usdcBalance;
 };
 
 module.exports = { mintUsdc };

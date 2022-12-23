@@ -158,11 +158,16 @@ contract Dca is AutomationCompatibleInterface {
                     investConfig.amountDeposited
                 );
 
-                swapper.swap(
+                uint256 amountOut = swapper.swap(
                     amountToSwap,
                     address(s_usdc),
                     investConfig.tokenToBuy
                 );
+
+                //Asset Swap failed
+                if (amountOut == 0) {
+                    continue;
+                }
 
                 s_addressToInvestConfig[investor]
                     .amountDeposited -= amountToSwap;

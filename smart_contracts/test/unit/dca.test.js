@@ -9,7 +9,8 @@ const { mintUsdc } = require("../../utils/mintUsdc");
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("dca", () => {
-      let deployer, user, dca, interval, usdc, weth;
+      let deployer, user, dca, interval, usdc, weth, actual_amount_minted;
+      const BUY_INTERVAL = 1; // 1 second
 
       beforeEach(async () => {
         await deployments.fixture(["all"]);
@@ -35,7 +36,8 @@ const { mintUsdc } = require("../../utils/mintUsdc");
 
         interval = await dca.getKeepersUpdateInterval();
 
-        await mintUsdc(deployer);
+        const amount = ethers.utils.parseUnits("1000", 6);
+        actual_amount_minted = await mintUsdc(deployer, amount);
 
         await usdc.approve(dca.address, ethers.constants.MaxInt256);
       });
@@ -44,7 +46,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
         //TODO: Add test for the case where an investor deposit more than once with different configurations
 
         it("sets deposited amount", async () => {
-          await dca.deposit(50);
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
 
           const amountInvestedDeployer = await dca.getAmountInvestedForAddress(
             deployer
@@ -60,29 +62,26 @@ const { mintUsdc } = require("../../utils/mintUsdc");
           assert.equal(amountInvestedUser.toString(), "0");
         });
 
-        it("transfers funds from user to contract", async () => {
+        it.only("transfers funds from user to contract", async () => {
           const startDcaBalance = await usdc.balanceOf(dca.address);
           assert.equal(startDcaBalance.toString(), "0");
 
           const startDeployerBalance = await usdc.balanceOf(deployer);
           assert.equal(
-            startDeployerBalance.toString(),
-            ethers.utils.parseUnits("100", 6).toString()
+            ethers.utils.formatUnits(startDeployerBalance, 6),
+            actual_amount_minted
           );
 
-          await dca.deposit(50);
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
 
           const finalDeployerBalance = await usdc.balanceOf(deployer);
           assert.equal(
-            finalDeployerBalance.toString(),
-            ethers.utils.parseUnits("50", 6)
+            ethers.utils.formatUnits(finalDeployerBalance, 6),
+            actual_amount_minted - 50
           );
 
           const finalDcaBalance = await usdc.balanceOf(dca.address);
-          assert.equal(
-            finalDcaBalance.toString(),
-            ethers.utils.parseUnits("50", 6)
-          );
+          assert.equal(ethers.utils.formatUnits(finalDcaBalance, 6), 50.0);
         });
       });
 
