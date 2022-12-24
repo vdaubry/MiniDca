@@ -151,41 +151,60 @@ contract Dca is AutomationCompatibleInterface {
 
         for (uint i = 0; i < s_investors.length; i++) {
             address investor = s_investors[i];
+
+            console.log("Check if Swap if need for address : %o ", investor);
+
             InvestConfig memory investConfig = s_addressToInvestConfig[
                 investor
             ];
 
             if (investConfig.nextBuyTimestamp > block.timestamp) {
-                uint256 amountToSwap = Math.min(
-                    investConfig.amountToBuy,
-                    investConfig.amountDeposited
+                console.log(
+                    "Next buy timestamp not reached : %o , current tiemstamp : %o",
+                    investConfig.nextBuyTimestamp,
+                    block.timestamp
                 );
-
-                uint256 amountOut = swapper.swap(
-                    amountToSwap,
-                    address(s_usdc),
-                    investConfig.tokenToBuy
-                );
-
-                //Asset Swap failed
-                if (amountOut == 0) {
-                    continue;
-                }
-
-                s_addressToInvestConfig[investor]
-                    .amountDeposited -= amountToSwap;
-
-                if (s_addressToInvestConfig[investor].amountDeposited <= 0) {
-                    deleteAddress(investor);
-                } else {
-                    s_addressToInvestConfig[investor].nextBuyTimestamp =
-                        block.timestamp +
-                        investConfig.buyInterval;
-                }
-
-                // todo: check if swap was successful => if not dont update s_addressToInvestConfig
-                // todo: retry ?
+                continue;
             }
+
+            // TODO : debug amout to swap
+            uint256 amountToSwap = Math.min(
+                investConfig.amountToBuy,
+                investConfig.amountDeposited
+            );
+
+            console.log(
+                "Swap USDC for Token : %o , with amount : %o",
+                investConfig.tokenToBuy,
+                amountToSwap
+            );
+            uint256 amountOut = swapper.swap(
+                amountToSwap,
+                address(s_usdc),
+                investConfig.tokenToBuy
+            );
+
+            //Asset Swap failed
+            if (amountOut == 0) {
+                console.log("Swap failed");
+                continue;
+            }
+
+            s_addressToInvestConfig[investor].amountDeposited -= amountToSwap;
+
+            if (s_addressToInvestConfig[investor].amountDeposited <= 0) {
+                console.log(
+                    "No more fund to swap, removing address from investors list"
+                );
+                deleteAddress(investor);
+            } else {
+                s_addressToInvestConfig[investor].nextBuyTimestamp =
+                    block.timestamp +
+                    investConfig.buyInterval;
+            }
+
+            // todo: check if swap was successful => if not dont update s_addressToInvestConfig
+            // todo: retry ?
         }
     }
 

@@ -116,14 +116,14 @@ const { mintUsdc } = require("../../utils/mintUsdc");
           assert.equal(nextBuyTimestamp, (timestamp + BUY_INTERVAL).toString());
         });
 
-        it.only("adds depositor to investor list", async () => {
+        it("adds depositor to investor list", async () => {
           await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
 
           const isInvestor = await dca.isInvestor(deployer);
           assert.equal(isInvestor, true);
         });
 
-        it.only("updates investor infos on second deposit", async () => {
+        it("updates investor infos on second deposit", async () => {
           await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
           await dca.deposit(50, dai.address, 20, 2);
 
@@ -153,7 +153,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
 
       describe("withdraw", () => {
         it("returns tokens to sender", async () => {
-          await dca.deposit(50);
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
 
           await dca.withdraw();
 
@@ -167,13 +167,13 @@ const { mintUsdc } = require("../../utils/mintUsdc");
 
           const deployerBalance = await usdc.balanceOf(deployer);
           assert.equal(
-            deployerBalance.toString(),
-            ethers.utils.parseUnits("100", 6).toString()
+            ethers.utils.formatUnits(deployerBalance.toString(), 6),
+            actual_amount_minted.toString()
           );
         });
 
         it("doesnt withdraw if user has no fund", async () => {
-          await dca.deposit(50);
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
 
           const signer = await ethers.getSigner(user);
           const conectedUserDca = await dca.connect(signer);
@@ -205,7 +205,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
         });
 
         it("returns false if interval has not passed", async () => {
-          await dca.deposit(50);
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
 
           const { upkeepNeeded } = await dca.callStatic.checkUpkeep([]);
 
@@ -214,13 +214,13 @@ const { mintUsdc } = require("../../utils/mintUsdc");
       });
 
       describe("performUpkeep", () => {
-        it("swaps assets", async () => {
-          await dca.deposit(150);
+        it.only("swaps assets", async () => {
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
 
           const initialDcaUsdcBalance = await usdc.balanceOf(dca.address);
           assert.equal(
             initialDcaUsdcBalance.toString(),
-            ethers.utils.parseUnits("150", 6)
+            ethers.utils.parseUnits("50", 6)
           );
 
           const initialDcaWethBalance = await weth.balanceOf(dca.address);
@@ -233,7 +233,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
           const finalDcaUsdcBalance = await usdc.balanceOf(dca.address);
           assert.equal(
             finalDcaUsdcBalance.toString(),
-            ethers.utils.parseUnits("50", 6)
+            ethers.utils.parseUnits("40", 6).toString()
           );
 
           const finalDcaWethBalance = await usdc.balanceOf(weth.address);
