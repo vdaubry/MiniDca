@@ -9,7 +9,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("dca", () => {
-      let deployer, user, dca, interval, usdc, weth, actual_amount_minted;
+      let deployer, user, dca, interval, usdc, weth, dai, actual_amount_minted;
       const BUY_INTERVAL = 1; // 1 second
 
       beforeEach(async () => {
@@ -34,6 +34,13 @@ const { mintUsdc } = require("../../utils/mintUsdc");
           deployer
         );
 
+        const daiTokenAddress = networkConfig[network.config.chainId].daiToken;
+        dai = await ethers.getContractAt(
+          "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+          daiTokenAddress,
+          deployer
+        );
+
         interval = await dca.getKeepersUpdateInterval();
 
         const amount = ethers.utils.parseUnits("1000", 6);
@@ -43,8 +50,6 @@ const { mintUsdc } = require("../../utils/mintUsdc");
       });
 
       describe("deposit", () => {
-        //TODO: Add test for the case where an investor deposit more than once with different configurations
-
         it("sets deposited amount", async () => {
           await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
 
@@ -116,6 +121,33 @@ const { mintUsdc } = require("../../utils/mintUsdc");
 
           const isInvestor = await dca.isInvestor(deployer);
           assert.equal(isInvestor, true);
+        });
+
+        it.only("updates investor infos on second deposit", async () => {
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
+          await dca.deposit(50, dai.address, 20, 2);
+
+          const amountInvestedDeployer = await dca.getAmountInvestedForAddress(
+            deployer
+          );
+          assert.equal(
+            amountInvestedDeployer.toString(),
+            ethers.utils.parseUnits("100", 6).toString()
+          );
+
+          const investors = await dca.getInvestors();
+          expect(investors.map((ad) => ad.toUpperCase())).to.eql([
+            deployer.toUpperCase(),
+          ]);
+
+          const tokenToBuy = await dca.getTokenToBuyForAddress(deployer);
+          assert.equal(tokenToBuy.toString(), dai.address);
+
+          const buyInterval = await dca.getBuyIntervalForAddress(deployer);
+          assert.equal(buyInterval, 2);
+
+          const amountToBuy = await dca.getAmounToBuyForAddress(deployer);
+          assert.equal(ethers.utils.formatUnits(amountToBuy, 18), 20);
         });
       });
 

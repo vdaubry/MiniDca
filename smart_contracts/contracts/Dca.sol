@@ -70,23 +70,26 @@ contract Dca is AutomationCompatibleInterface {
             "deposit: transferFrom failed"
         );
 
-        //todo : if an investor deposit again, we should not add it again to the investor list
-        s_investors.push(msg.sender);
+        InvestConfig memory investConfig = s_addressToInvestConfig[msg.sender];
+        if (!investConfig.exists) {
+            s_investors.push(msg.sender);
+        }
 
         uint256 nextBuyTimestamp = block.timestamp + buyInterval;
         ERC20 tokenToBuy = ERC20(tokenToBuyAddress);
         amountToBuy = amountToBuy * 10 ** tokenToBuy.decimals();
         uint256 index = s_investors.length - 1;
-        InvestConfig memory investConfig = InvestConfig(
-            tokenToBuyAddress,
-            amountToBuy,
-            buyInterval,
-            nextBuyTimestamp,
-            formatedDepositAmount,
-            index,
-            true
-        );
-        s_addressToInvestConfig[msg.sender] = investConfig;
+        uint256 totalDepositAmount = investConfig.amountDeposited +
+            formatedDepositAmount;
+
+        s_addressToInvestConfig[msg.sender].tokenToBuy = tokenToBuyAddress;
+        s_addressToInvestConfig[msg.sender].amountToBuy = amountToBuy;
+        s_addressToInvestConfig[msg.sender].buyInterval = buyInterval;
+        s_addressToInvestConfig[msg.sender].nextBuyTimestamp = nextBuyTimestamp;
+        s_addressToInvestConfig[msg.sender]
+            .amountDeposited = totalDepositAmount;
+        s_addressToInvestConfig[msg.sender].index = index;
+        s_addressToInvestConfig[msg.sender].exists = true;
     }
 
     function withdraw() public {
@@ -223,5 +226,9 @@ contract Dca is AutomationCompatibleInterface {
     function isInvestor(address investor) public view returns (bool) {
         uint256 index = s_addressToInvestConfig[investor].index;
         return s_investors[index] == investor;
+    }
+
+    function getInvestors() public view returns (address[] memory) {
+        return s_investors;
     }
 }
