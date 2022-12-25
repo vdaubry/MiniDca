@@ -98,7 +98,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
           const buyInterval = await dca.getBuyIntervalForAddress(deployer);
 
           const amountToBuy = await dca.getAmounToBuyForAddress(deployer);
-          assert.equal(ethers.utils.formatUnits(amountToBuy, 18), 10);
+          assert.equal(ethers.utils.formatUnits(amountToBuy, 6), 10);
         });
 
         it("sets nextBuyTimestamp", async () => {
@@ -147,7 +147,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
           assert.equal(buyInterval, 2);
 
           const amountToBuy = await dca.getAmounToBuyForAddress(deployer);
-          assert.equal(ethers.utils.formatUnits(amountToBuy, 18), 20);
+          assert.equal(ethers.utils.formatUnits(amountToBuy, 6), 20);
         });
       });
 
@@ -214,7 +214,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
       });
 
       describe("performUpkeep", () => {
-        it.only("swaps assets", async () => {
+        it("swaps assets", async () => {
           await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
 
           const initialDcaUsdcBalance = await usdc.balanceOf(dca.address);

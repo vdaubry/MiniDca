@@ -48,7 +48,6 @@ const mintUsdc = async (receiverAddress, amount) => {
   );
   await configureMinterTx.wait(1);
 
-  console.log("Mint Usdc for deployer");
   const mintTx = await connectedUsdcMinter.mint(receiverAddress, amount);
   await mintTx.wait(1);
 
@@ -56,7 +55,6 @@ const mintUsdc = async (receiverAddress, amount) => {
     await connectedUsdcMinter.balanceOf(receiverAddress),
     6
   );
-  console.log(`Got ${usdcBalance.toString()} USDC`);
 
   return usdcBalance;
 };

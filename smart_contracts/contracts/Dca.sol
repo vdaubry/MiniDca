@@ -53,7 +53,6 @@ contract Dca is AutomationCompatibleInterface {
         uint256 amountToBuy,
         uint256 buyInterval
     ) public {
-        console.log("Calling deposit");
         require(depositAmount > 0, "deposit: Amount must be greater than zero");
         require(
             s_usdc.allowance(msg.sender, address(this)) >= depositAmount,
@@ -76,8 +75,7 @@ contract Dca is AutomationCompatibleInterface {
         }
 
         uint256 nextBuyTimestamp = block.timestamp + buyInterval;
-        ERC20 tokenToBuy = ERC20(tokenToBuyAddress);
-        amountToBuy = amountToBuy * 10 ** tokenToBuy.decimals();
+        amountToBuy = amountToBuy * 10 ** USDC_DECIMALS;
         uint256 index = s_investors.length - 1;
         uint256 totalDepositAmount = investConfig.amountDeposited +
             formatedDepositAmount;
@@ -167,7 +165,6 @@ contract Dca is AutomationCompatibleInterface {
                 continue;
             }
 
-            // TODO : debug amout to swap
             uint256 amountToSwap = Math.min(
                 investConfig.amountToBuy,
                 investConfig.amountDeposited
