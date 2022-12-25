@@ -27,7 +27,8 @@ contract SimpleSwap {
     function swap(
         uint256 amountIn,
         address tokenA,
-        address tokenB
+        address tokenB,
+        address recipient
     ) external returns (uint256 amountOut) {
         console.log(
             "Calling swap with msg.sender : %o ; tokenA : %o, balance: %o",
@@ -67,7 +68,7 @@ contract SimpleSwap {
                 tokenIn: tokenA,
                 tokenOut: tokenB,
                 fee: feeTier,
-                recipient: msg.sender,
+                recipient: recipient,
                 deadline: block.timestamp,
                 amountIn: amountIn,
                 amountOutMinimum: minOut,
@@ -78,6 +79,6 @@ contract SimpleSwap {
         amountOut = swapRouter.exactInputSingle(params);
         emit SwappedFor(amountOut);
 
-        return (2);
+        return (amountOut);
     }
 }

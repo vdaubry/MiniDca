@@ -178,7 +178,8 @@ contract Dca is AutomationCompatibleInterface {
             uint256 amountOut = swapper.swap(
                 amountToSwap,
                 address(s_usdc),
-                investConfig.tokenToBuy
+                investConfig.tokenToBuy,
+                investor
             );
 
             //Asset Swap failed
@@ -199,9 +200,6 @@ contract Dca is AutomationCompatibleInterface {
                     block.timestamp +
                     investConfig.buyInterval;
             }
-
-            // todo: check if swap was successful => if not dont update s_addressToInvestConfig
-            // todo: retry ?
         }
     }
 

@@ -214,7 +214,10 @@ const { mintUsdc } = require("../../utils/mintUsdc");
       });
 
       describe("performUpkeep", () => {
-        it("swaps assets", async () => {
+        // TODO: test if when the user has less amount deposited than amount to buy
+        // TODO: test with multiple investors
+
+        it.only("swaps assets", async () => {
           await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
 
           const initialDcaUsdcBalance = await usdc.balanceOf(dca.address);
@@ -223,7 +226,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
             ethers.utils.parseUnits("50", 6)
           );
 
-          const initialDcaWethBalance = await weth.balanceOf(dca.address);
+          const initialDcaWethBalance = await weth.balanceOf(deployer);
           assert.equal(initialDcaWethBalance.toString(), "0");
 
           await prepareUpkeep();
@@ -236,7 +239,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
             ethers.utils.parseUnits("40", 6).toString()
           );
 
-          const finalDcaWethBalance = await usdc.balanceOf(weth.address);
+          const finalDcaWethBalance = await weth.balanceOf(deployer);
           assert.isAbove(finalDcaWethBalance, 0);
         });
 
