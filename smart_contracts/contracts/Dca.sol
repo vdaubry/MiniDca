@@ -103,7 +103,6 @@ contract Dca is AutomationCompatibleInterface {
         s_usdc.transfer(msg.sender, amountToWithdraw);
     }
 
-    //todo: add unit tests
     /// @notice remove an investor from investors array
     /// @dev first we swap the last element of the array with the element to remove
     /// @dev then we remove the last element of the array

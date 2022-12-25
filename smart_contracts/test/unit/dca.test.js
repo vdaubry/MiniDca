@@ -176,12 +176,12 @@ const { mintUsdc } = require("../../utils/mintUsdc");
           await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
 
           const signer = await ethers.getSigner(user);
-          const conectedUserDca = await dca.connect(signer);
+          const connectedUserDca = await dca.connect(signer);
 
           await expect(
-            conectedUserDca.withdraw()
+            connectedUserDca.withdraw()
           ).to.be.revertedWithCustomError(
-            conectedUserDca,
+            connectedUserDca,
             "Dca__WithdrawError"
           );
 
@@ -214,10 +214,7 @@ const { mintUsdc } = require("../../utils/mintUsdc");
       });
 
       describe("performUpkeep", () => {
-        // TODO: test if when the user has less amount deposited than amount to buy
-        // TODO: test with multiple investors
-
-        it.only("swaps assets", async () => {
+        it("swaps assets", async () => {
           await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
 
           const initialDcaUsdcBalance = await usdc.balanceOf(dca.address);
@@ -248,6 +245,74 @@ const { mintUsdc } = require("../../utils/mintUsdc");
             dca,
             "Dca__UpkeepNotNeeded"
           );
+        });
+
+        it("swaps remaining amount if user has less amount deposited than amount to buy", async () => {
+          await dca.deposit(50, weth.address, 100, BUY_INTERVAL);
+
+          await prepareUpkeep();
+
+          await dca.performUpkeep([]);
+
+          const finalDcaUsdcBalance = await usdc.balanceOf(dca.address);
+          assert.equal(finalDcaUsdcBalance.toString(), "0");
+
+          const finalDcaWethBalance = await weth.balanceOf(deployer);
+          assert.isAbove(finalDcaWethBalance, 0);
+        });
+
+        it("swaps assets for multiple investors", async () => {
+          const deployerBuy = 10;
+          const deployerDeposit = 50;
+          const userBuy = 20;
+          const userDeposit = 50;
+          await dca.deposit(
+            deployerDeposit,
+            weth.address,
+            deployerBuy,
+            BUY_INTERVAL
+          );
+
+          const signer = await ethers.getSigner(user);
+          const connectedUserDca = await dca.connect(signer);
+          const connectedUserUsdc = await usdc.connect(signer);
+          const amount = ethers.utils.parseUnits("1000", 6);
+          await mintUsdc(user, amount);
+          await connectedUserUsdc.approve(
+            dca.address,
+            ethers.constants.MaxInt256
+          );
+          await connectedUserDca.deposit(
+            userDeposit,
+            dai.address,
+            userBuy,
+            BUY_INTERVAL
+          );
+
+          await prepareUpkeep();
+
+          await dca.performUpkeep([]);
+
+          const finalDcaUsdcBalance = await usdc.balanceOf(dca.address);
+          assert.equal(
+            finalDcaUsdcBalance.toString(),
+            ethers.utils
+              .parseUnits(
+                (
+                  userDeposit +
+                  deployerDeposit -
+                  (userBuy + deployerBuy)
+                ).toString(),
+                6
+              )
+              .toString()
+          );
+
+          const finalDcaWethBalance = await weth.balanceOf(deployer);
+          assert.isAbove(finalDcaWethBalance, 0);
+
+          const finalDcaDaiBalance = await dai.balanceOf(user);
+          assert.isAbove(finalDcaDaiBalance, 0);
         });
       });
     });
