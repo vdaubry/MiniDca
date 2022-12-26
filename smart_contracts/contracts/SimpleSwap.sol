@@ -3,20 +3,25 @@ pragma solidity ^0.8.7;
 pragma abicoder v2;
 
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
+import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
+import "@uniswap/v3-core/contracts/libraries/FixedPoint96.sol";
 import "hardhat/console.sol";
 
 contract SimpleSwap {
     ISwapRouter public immutable swapRouter;
-    uint24 public constant feeTier = 3000;
+    IUniswapV3Factory public immutable uniswapV3Factory;
+    uint24 public constant FEE_TIER = 3000;
 
     event SwappedFor(uint256 amountOut);
 
     /// @notice Creates a new SimpleSwap contract
     /// @dev see https://docs.uniswap.org/contracts/v3/reference/deployments
     /// @param _swapRouter The contract address of the uniswap V3 router
-    constructor(ISwapRouter _swapRouter) {
+    constructor(ISwapRouter _swapRouter, IUniswapV3Factory _uniswapV3Factory) {
         swapRouter = _swapRouter;
+        uniswapV3Factory = _uniswapV3Factory;
     }
 
     /// @notice Swaps the specified amount of tokenA for tokenB
@@ -67,7 +72,7 @@ contract SimpleSwap {
             .ExactInputSingleParams({
                 tokenIn: tokenA,
                 tokenOut: tokenB,
-                fee: feeTier,
+                fee: FEE_TIER,
                 recipient: recipient,
                 deadline: block.timestamp,
                 amountIn: amountIn,
@@ -81,4 +86,29 @@ contract SimpleSwap {
 
         return (amountOut);
     }
+
+    function getTokenBPriceInTokenA(
+        address tokenA,
+        address tokenB
+    ) public view returns (uint256) {
+        IUniswapV3Pool pool = IUniswapV3Pool(
+            uniswapV3Factory.getPool(tokenA, tokenB, FEE_TIER)
+        );
+
+        // https://docs.uniswap.org/contracts/v3/reference/core/interfaces/pool/IUniswapV3PoolState#slot0
+        (uint160 sqrtPriceX96, , , , , , ) = pool.slot0();
+
+        // TODO : explain this calculation
+        // TODO : add unit tests
+        return (uint(sqrtPriceX96) * (uint(sqrtPriceX96)) * (1e18)) >> (96 * 2);
+    }
+
+    // function sqrtPriceX96ToUint(
+    //     uint160 sqrtPriceX96,
+    //     uint8 decimalsToken0
+    // ) internal pure returns (uint256) {
+    //     uint256 numerator1 = uint256(sqrtPriceX96) * uint256(sqrtPriceX96);
+    //     uint256 numerator2 = 10 ** decimalsToken0;
+    //     return (numerator1 * numerator2) / (1 << 192);
+    // }
 }
