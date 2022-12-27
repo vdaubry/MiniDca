@@ -7,6 +7,7 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
   ? describe.skip
   : describe("simpleSwap", () => {
       let deployer, usdc, weth, dai, simpleSwap;
+      const MAX_SLIPPAGE_BPS = 5;
 
       beforeEach(async () => {
         await deployments.fixture(["all"]);
@@ -45,7 +46,7 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
 
       describe("getTokenAPriceInTokenB", async () => {
         it("should return the correct price for 1 USDC in WETH", async () => {
-          const amountOut = ethers.utils.parseUnits("0.000823", 6);
+          const amountOut = ethers.utils.parseUnits("0.000823", 18);
 
           const price = await simpleSwap.getTokenAPriceInTokenB(
             usdc.address,
@@ -64,6 +65,45 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
           );
 
           assert.equal(price.toString(), amountOut.toString());
+        });
+      });
+
+      describe("getMinAmountOut", async () => {
+        it.only("should return the correct minimum amount out for 1 USDC in WETH", async () => {
+          const USDCAmount = 1000;
+          const ETH_PRICE_USDC = 1214.980139;
+          const amountIn = ethers.utils.parseUnits(USDCAmount.toString(), 6);
+
+          const amountOut = ethers.utils.parseUnits(
+            (
+              (USDCAmount / ETH_PRICE_USDC) *
+              (1 - MAX_SLIPPAGE_BPS / 1000)
+            ).toString(),
+            18
+          );
+
+          const minAmountOut = await simpleSwap.getMinAmountOut(
+            amountIn,
+            usdc.address,
+            weth.address,
+            MAX_SLIPPAGE_BPS
+          );
+
+          assert.equal(minAmountOut.toString(), amountOut.toString());
+        });
+
+        it("should return the correct minimum amount out for 1 DAI in USDC", async () => {
+          const amountIn = ethers.utils.parseUnits("1", 6);
+          const amountOut = ethers.utils.parseUnits("0.997585", 18);
+
+          const minAmountOut = await simpleSwap.getMinAmountOut(
+            usdc.address,
+            dai.address,
+            amountIn,
+            MAX_SLIPPAGE_BPS
+          );
+
+          assert.equal(minAmountOut.toString(), amountOut.toString());
         });
       });
     });

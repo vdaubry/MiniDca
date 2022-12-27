@@ -14,7 +14,6 @@ contract SimpleSwap {
     ISwapRouter public immutable swapRouter;
     IUniswapV3Factory public immutable uniswapV3Factory;
     uint24 public constant FEE_TIER = 3000;
-    uint256 public constant MAX_SLIPPAGE_PERCENTAGE = 5;
 
     event SwappedFor(uint256 amountOut);
 
@@ -35,7 +34,8 @@ contract SimpleSwap {
         uint256 amountIn,
         address tokenA,
         address tokenB,
-        address recipient
+        address recipient,
+        uint256 maxSlippageBps
     ) external returns (uint256 amountOut) {
         console.log(
             "Calling swap with msg.sender : %o ; tokenA : %o, balance: %o",
@@ -67,7 +67,12 @@ contract SimpleSwap {
         TransferHelper.safeApprove(tokenA, address(swapRouter), amountIn);
 
         // TODO: set slippage limits
-        uint256 minOut = getMinAmountOut(amountIn, tokenA, tokenB);
+        uint256 minOut = getMinAmountOut(
+            amountIn,
+            tokenA,
+            tokenB,
+            maxSlippageBps
+        );
 
         // We dont set any constraint on the price the swap will push the pool to
         uint160 priceLimit = 0;
@@ -94,14 +99,14 @@ contract SimpleSwap {
     function getMinAmountOut(
         uint256 amountIn,
         address tokenA,
-        address tokenB
+        address tokenB,
+        uint256 maxSlippageBps
     ) public view returns (uint256) {
+        console.log("Calling getMinAmountOut with amountIn : %o", amountIn);
         uint256 price = getTokenAPriceInTokenB(tokenA, tokenB);
 
-        uint256 minOut = (price *
-            amountIn *
-            (10000 - MAX_SLIPPAGE_PERCENTAGE)) / 10000;
-        return minOut;
+        uint256 minOut = (price * amountIn * (10000 - maxSlippageBps)) / 10000;
+        return minOut / 10 ** 6;
     }
 
     /// @notice Returns the price of tokenB in tokenA
@@ -155,6 +160,7 @@ contract SimpleSwap {
 
         (uint160 sqrtPriceX96, , , , , , ) = pool.slot0();
         uint256 decimalsTokenA = ERC20(tokenA).decimals();
+        uint256 decimalsTokenB = ERC20(tokenB).decimals();
         uint256 q96 = 2 ** 96;
 
         uint256 numerator = 10 ** decimalsTokenA;
@@ -165,7 +171,8 @@ contract SimpleSwap {
             denominator = ((q96 / sqrtPriceX96) ** 2);
         }
 
-        uint256 priceOfTokenAInTokenB = denominator / numerator;
+        uint256 priceOfTokenAInTokenB = (denominator / numerator) *
+            10 ** (decimalsTokenB - decimalsTokenA);
         return priceOfTokenAInTokenB;
     }
 }

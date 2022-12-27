@@ -33,6 +33,7 @@ contract Dca is AutomationCompatibleInterface {
     SimpleSwap immutable swapper;
 
     uint public constant USDC_DECIMALS = 6;
+    uint private constant MAX_SLIPPAGE_BPS = 5;
 
     constructor(
         address _usdcAddress,
@@ -178,7 +179,8 @@ contract Dca is AutomationCompatibleInterface {
                 amountToSwap,
                 address(s_usdc),
                 investConfig.tokenToBuy,
-                investor
+                investor,
+                MAX_SLIPPAGE_BPS
             );
 
             //Asset Swap failed
