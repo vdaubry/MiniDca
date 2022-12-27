@@ -1,10 +1,8 @@
 const { assert, expect } = require("chai");
 const { deployments, ethers, getNamedAccounts } = require("hardhat");
-const {
-  developmentChains,
-  networkConfig,
-} = require("../../helper-hardhat-config");
+const { developmentChains } = require("../../helper-hardhat-config");
 const { mintUsdc } = require("../../utils/mintUsdc");
+const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
 
 !developmentChains.includes(network.name)
   ? describe.skip
@@ -18,28 +16,9 @@ const { mintUsdc } = require("../../utils/mintUsdc");
         user = (await getNamedAccounts()).user;
         dca = await ethers.getContract("Dca", deployer);
 
-        const usdcTokenAddress =
-          networkConfig[network.config.chainId].usdcToken;
-        usdc = await ethers.getContractAt(
-          "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-          usdcTokenAddress,
-          deployer
-        );
-
-        const wethTokenAddress =
-          networkConfig[network.config.chainId].wethToken;
-        weth = await ethers.getContractAt(
-          "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-          wethTokenAddress,
-          deployer
-        );
-
-        const daiTokenAddress = networkConfig[network.config.chainId].daiToken;
-        dai = await ethers.getContractAt(
-          "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-          daiTokenAddress,
-          deployer
-        );
+        usdc = await getUSDC(deployer);
+        weth = await getWETH(deployer);
+        dai = await getDAI(deployer);
 
         interval = await dca.getKeepersUpdateInterval();
 

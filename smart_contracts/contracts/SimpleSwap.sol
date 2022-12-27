@@ -101,24 +101,32 @@ contract SimpleSwap {
         address tokenA,
         address tokenB
     ) public view returns (uint256) {
+        console.log("Calling getTokenBPriceInTokenA");
+
         IUniswapV3Pool pool = IUniswapV3Pool(
             uniswapV3Factory.getPool(tokenA, tokenB, FEE_TIER)
         );
-
-        uint256 decimalsTokenA = ERC20(tokenA).decimals();
-        uint256 decimalsTokenB = ERC20(tokenB).decimals();
-        uint256 q96 = 2 ** 96;
-
         // https://docs.uniswap.org/contracts/v3/reference/core/interfaces/pool/IUniswapV3PoolState#slot0
         (uint160 sqrtPriceX96, , , , , , ) = pool.slot0();
+        console.log("sqrtPriceX96 : %o", sqrtPriceX96);
 
-        // TODO : explain this calculation
-        // TODO : add unit tests
-        uint256 priceOfTokenBInTokenA = 10 **
-            (decimalsTokenB - decimalsTokenA) /
-            ((sqrtPriceX96 / q96) ** 2);
+        uint256 decimalsTokenA = ERC20(tokenA).decimals();
+        console.log("decimalsTokenA : %o", decimalsTokenA);
+        uint256 decimalsTokenB = ERC20(tokenB).decimals();
+        console.log("decimalsTokenB : %o", decimalsTokenB);
+        uint256 q96 = 2 ** 96;
+        console.log("q96 : %o", q96);
 
-        return priceOfTokenBInTokenA;
+        uint256 numerator = 10 ** (decimalsTokenB - decimalsTokenA);
+        console.log("numerator : %o", numerator);
+
+        uint256 denominator = ((sqrtPriceX96 / q96) ** 2);
+        console.log("denominator : %o", denominator);
+
+        uint256 priceOfTokenBInTokenA = numerator / denominator;
+        console.log("priceOfTokenBInTokenA : %o", priceOfTokenBInTokenA);
+
+        return 0; //priceOfTokenBInTokenA;
     }
 
     // function sqrtPriceX96ToUint(
