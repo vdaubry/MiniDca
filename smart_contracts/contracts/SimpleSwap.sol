@@ -14,7 +14,7 @@ contract SimpleSwap {
     ISwapRouter public immutable swapRouter;
     IUniswapV3Factory public immutable uniswapV3Factory;
     uint24 public constant FEE_TIER = 3000;
-    uint256 public constant MAX_SLIPPAGE_PERCENTAGE = 50;
+    uint256 public constant MAX_SLIPPAGE_PERCENTAGE = 5;
 
     event SwappedFor(uint256 amountOut);
 
@@ -67,7 +67,7 @@ contract SimpleSwap {
         TransferHelper.safeApprove(tokenA, address(swapRouter), amountIn);
 
         // TODO: set slippage limits
-        uint256 minOut = 0;
+        uint256 minOut = getMinAmountOut(amountIn, tokenA, tokenB);
 
         // We dont set any constraint on the price the swap will push the pool to
         uint160 priceLimit = 0;
@@ -89,6 +89,19 @@ contract SimpleSwap {
         emit SwappedFor(amountOut);
 
         return (amountOut);
+    }
+
+    function getMinAmountOut(
+        uint256 amountIn,
+        address tokenA,
+        address tokenB
+    ) public view returns (uint256) {
+        uint256 price = getTokenAPriceInTokenB(tokenA, tokenB);
+
+        uint256 minOut = (price *
+            amountIn *
+            (10000 - MAX_SLIPPAGE_PERCENTAGE)) / 10000;
+        return minOut;
     }
 
     /// @notice Returns the price of tokenB in tokenA
