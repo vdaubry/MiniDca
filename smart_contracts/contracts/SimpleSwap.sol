@@ -7,6 +7,7 @@ import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "@uniswap/v3-core/contracts/libraries/FixedPoint96.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "hardhat/console.sol";
 
 contract SimpleSwap {
@@ -87,6 +88,15 @@ contract SimpleSwap {
         return (amountOut);
     }
 
+    /// @notice Returns the price of tokenB in tokenA
+    /// @param tokenA token address to swap from
+    /// @param tokenB token address to swap to
+    /// @return The price of tokenB in tokenA
+    /// @dev We get the price from sqrtPriceX96 : https://docs.uniswap.org/sdk/v3/guides/fetching-prices
+    /// @dev We use the following formula to get the price :
+    /// p = (sqrtPriceX96 / Q96) ** 2
+    /// => tokenBPriceInTokenA = 1 / p
+    /// => tokenBPriceInTokenA = 10 ** (decimalsToken1 - decimalsToken0) / ((sqrtPriceX96/q96) ** 2)
     function getTokenBPriceInTokenA(
         address tokenA,
         address tokenB
@@ -95,12 +105,20 @@ contract SimpleSwap {
             uniswapV3Factory.getPool(tokenA, tokenB, FEE_TIER)
         );
 
+        uint256 decimalsTokenA = ERC20(tokenA).decimals();
+        uint256 decimalsTokenB = ERC20(tokenB).decimals();
+        uint256 q96 = 2 ** 96;
+
         // https://docs.uniswap.org/contracts/v3/reference/core/interfaces/pool/IUniswapV3PoolState#slot0
         (uint160 sqrtPriceX96, , , , , , ) = pool.slot0();
 
         // TODO : explain this calculation
         // TODO : add unit tests
-        return (uint(sqrtPriceX96) * (uint(sqrtPriceX96)) * (1e18)) >> (96 * 2);
+        uint256 priceOfTokenBInTokenA = 10 **
+            (decimalsTokenB - decimalsTokenA) /
+            ((sqrtPriceX96 / q96) ** 2);
+
+        return priceOfTokenBInTokenA;
     }
 
     // function sqrtPriceX96ToUint(

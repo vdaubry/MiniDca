@@ -24,11 +24,11 @@ module.exports = async (hre) => {
   log("---------------------------------");
   log(`Deploy SimpleSwap with owner : ${deployer}`);
 
-  const routerAddress = networkConfig[network.config.chainId].swapRouter;
-  const factoryAddress = networkConfig[network.config.chainId].swapFactory;
+  const routerAddress = networkConfig[chainId].swapRouter;
+  const factoryAddress = networkConfig[chainId].swapFactory;
 
   const arguments = [routerAddress, factoryAddress];
-  const sampleLog = await deploy("SimpleSwap", {
+  const simpleSwap = await deploy("SimpleSwap", {
     from: deployer,
     args: arguments,
     log: true,
