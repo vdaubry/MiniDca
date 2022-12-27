@@ -20,7 +20,7 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
       });
 
       describe("getTokenBPriceInTokenA", async () => {
-        it.only("should return the correct price for WETH in USDC", async () => {
+        it("should return the correct price for 1 WETH in USDC", async () => {
           const amountOut = ethers.utils.parseUnits("1214.980139", 6);
 
           const price = await simpleSwap.getTokenBPriceInTokenA(
@@ -31,10 +31,34 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
           assert.equal(price.toString(), amountOut.toString());
         });
 
-        it.only("should return the correct price for DAI in USDC", async () => {
+        it("should return the correct price for 1 DAI in USDC", async () => {
           const amountOut = ethers.utils.parseUnits("1.002420", 6);
 
           const price = await simpleSwap.getTokenBPriceInTokenA(
+            usdc.address,
+            dai.address
+          );
+
+          assert.equal(price.toString(), amountOut.toString());
+        });
+      });
+
+      describe("getTokenAPriceInTokenB", async () => {
+        it("should return the correct price for 1 USDC in WETH", async () => {
+          const amountOut = ethers.utils.parseUnits("0.000823", 6);
+
+          const price = await simpleSwap.getTokenAPriceInTokenB(
+            usdc.address,
+            weth.address
+          );
+
+          assert.equal(price.toString(), amountOut.toString());
+        });
+
+        it("should return the correct price for DAI in USDC", async () => {
+          const amountOut = ethers.utils.parseUnits("0.997585", 6);
+
+          const price = await simpleSwap.getTokenAPriceInTokenB(
             usdc.address,
             dai.address
           );
