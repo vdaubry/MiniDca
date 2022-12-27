@@ -21,13 +21,11 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
 
       describe("getTokenBPriceInTokenA", async () => {
         it.only("should return the correct price", async () => {
-          const amountIn = ethers.utils.parseUnits("100", 6);
           const amountOut = ethers.utils.parseUnits("1", 18);
 
           const price = await simpleSwap.getTokenBPriceInTokenA(
             usdc.address,
-            dai.address,
-            amountIn
+            dai.address
           );
 
           assert.equal(price.toString(), amountOut.toString());
