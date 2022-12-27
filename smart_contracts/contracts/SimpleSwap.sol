@@ -96,45 +96,30 @@ contract SimpleSwap {
     /// @dev We use the following formula to get the price :
     /// p = (sqrtPriceX96 / Q96) ** 2
     /// => tokenBPriceInTokenA = 1 / p
-    /// => tokenBPriceInTokenA = 10 ** (decimalsToken1 - decimalsToken0) / ((sqrtPriceX96/q96) ** 2)
+    /// => tokenBPriceInTokenA = 10 ** (decimalsTokenB) / ((sqrtPriceX96/q96) ** 2)
     function getTokenBPriceInTokenA(
         address tokenA,
         address tokenB
     ) public view returns (uint256) {
-        console.log("Calling getTokenBPriceInTokenA");
-
         IUniswapV3Pool pool = IUniswapV3Pool(
             uniswapV3Factory.getPool(tokenA, tokenB, FEE_TIER)
         );
+
         // https://docs.uniswap.org/contracts/v3/reference/core/interfaces/pool/IUniswapV3PoolState#slot0
         (uint160 sqrtPriceX96, , , , , , ) = pool.slot0();
-        console.log("sqrtPriceX96 : %o", sqrtPriceX96);
 
-        uint256 decimalsTokenA = ERC20(tokenA).decimals();
-        console.log("decimalsTokenA : %o", decimalsTokenA);
         uint256 decimalsTokenB = ERC20(tokenB).decimals();
-        console.log("decimalsTokenB : %o", decimalsTokenB);
         uint256 q96 = 2 ** 96;
-        console.log("q96 : %o", q96);
+        uint256 numerator = 10 ** (decimalsTokenB);
 
-        uint256 numerator = 10 ** (decimalsTokenB - decimalsTokenA);
-        console.log("numerator : %o", numerator);
-
-        uint256 denominator = ((sqrtPriceX96 / q96) ** 2);
-        console.log("denominator : %o", denominator);
+        uint256 denominator;
+        if (sqrtPriceX96 > q96) {
+            denominator = ((sqrtPriceX96 / q96) ** 2);
+        } else {
+            denominator = ((q96 / sqrtPriceX96) ** 2);
+        }
 
         uint256 priceOfTokenBInTokenA = numerator / denominator;
-        console.log("priceOfTokenBInTokenA : %o", priceOfTokenBInTokenA);
-
-        return 0; //priceOfTokenBInTokenA;
+        return priceOfTokenBInTokenA;
     }
-
-    // function sqrtPriceX96ToUint(
-    //     uint160 sqrtPriceX96,
-    //     uint8 decimalsToken0
-    // ) internal pure returns (uint256) {
-    //     uint256 numerator1 = uint256(sqrtPriceX96) * uint256(sqrtPriceX96);
-    //     uint256 numerator2 = 10 ** decimalsToken0;
-    //     return (numerator1 * numerator2) / (1 << 192);
-    // }
 }

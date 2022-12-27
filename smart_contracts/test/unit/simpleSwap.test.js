@@ -20,8 +20,19 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
       });
 
       describe("getTokenBPriceInTokenA", async () => {
-        it.only("should return the correct price", async () => {
-          const amountOut = ethers.utils.parseUnits("1", 18);
+        it.only("should return the correct price for WETH in USDC", async () => {
+          const amountOut = ethers.utils.parseUnits("1214.980139", 6);
+
+          const price = await simpleSwap.getTokenBPriceInTokenA(
+            usdc.address,
+            weth.address
+          );
+
+          assert.equal(price.toString(), amountOut.toString());
+        });
+
+        it.only("should return the correct price for DAI in USDC", async () => {
+          const amountOut = ethers.utils.parseUnits("1.002420", 6);
 
           const price = await simpleSwap.getTokenBPriceInTokenA(
             usdc.address,
