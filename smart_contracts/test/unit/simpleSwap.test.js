@@ -57,7 +57,7 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
         });
 
         it("should return the correct price for DAI in USDC", async () => {
-          const amountOut = ethers.utils.parseUnits("0.997585", 6);
+          const amountOut = ethers.utils.parseUnits("0.997585", 18);
 
           const price = await simpleSwap.getTokenAPriceInTokenB(
             usdc.address,
@@ -69,14 +69,15 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
       });
 
       describe("getMinAmountOut", async () => {
-        it.only("should return the correct minimum amount out for 1 USDC in WETH", async () => {
+        it("should return the correct minimum amount out for 1 USDC in WETH", async () => {
           const USDCAmount = 1000;
-          const ETH_PRICE_USDC = 1214.980139;
+          const USDC_PRICE_ETH = 0.000823;
           const amountIn = ethers.utils.parseUnits(USDCAmount.toString(), 6);
 
           const amountOut = ethers.utils.parseUnits(
             (
-              (USDCAmount / ETH_PRICE_USDC) *
+              USDCAmount *
+              USDC_PRICE_ETH *
               (1 - MAX_SLIPPAGE_BPS / 1000)
             ).toString(),
             18
@@ -86,20 +87,6 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
             amountIn,
             usdc.address,
             weth.address,
-            MAX_SLIPPAGE_BPS
-          );
-
-          assert.equal(minAmountOut.toString(), amountOut.toString());
-        });
-
-        it("should return the correct minimum amount out for 1 DAI in USDC", async () => {
-          const amountIn = ethers.utils.parseUnits("1", 6);
-          const amountOut = ethers.utils.parseUnits("0.997585", 18);
-
-          const minAmountOut = await simpleSwap.getMinAmountOut(
-            usdc.address,
-            dai.address,
-            amountIn,
             MAX_SLIPPAGE_BPS
           );
 

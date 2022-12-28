@@ -66,7 +66,7 @@ contract SimpleSwap {
         // Approve the router to spend tokenA.
         TransferHelper.safeApprove(tokenA, address(swapRouter), amountIn);
 
-        // TODO: set slippage limits
+        // Get the maximum slippage allowed for tokenB
         uint256 minOut = getMinAmountOut(
             amountIn,
             tokenA,
@@ -96,6 +96,11 @@ contract SimpleSwap {
         return (amountOut);
     }
 
+    /// @notice Returns the minimum amount of tokenB to receive for the specified amount of tokenA
+    /// @param amountIn The amount of tokenA to Swap
+    /// @param tokenA token address to swap from
+    /// @param tokenB token address to swap to
+    /// @param maxSlippageBps The maximum slippage in bps
     function getMinAmountOut(
         uint256 amountIn,
         address tokenA,
@@ -104,8 +109,8 @@ contract SimpleSwap {
     ) public view returns (uint256) {
         console.log("Calling getMinAmountOut with amountIn : %o", amountIn);
         uint256 price = getTokenAPriceInTokenB(tokenA, tokenB);
-
-        uint256 minOut = (price * amountIn * (10000 - maxSlippageBps)) / 10000;
+        uint256 slippage = (1000 - maxSlippageBps);
+        uint256 minOut = (price * amountIn * slippage) / 1000;
         return minOut / 10 ** 6;
     }
 
