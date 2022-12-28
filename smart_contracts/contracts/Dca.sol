@@ -35,6 +35,9 @@ contract Dca is AutomationCompatibleInterface {
     uint public constant USDC_DECIMALS = 6;
     uint private constant MAX_SLIPPAGE_BPS = 5;
 
+    event Log(string message);
+    event LogBytes(bytes data);
+
     constructor(
         address _usdcAddress,
         uint _keepersUpdateInterval,
@@ -175,31 +178,44 @@ contract Dca is AutomationCompatibleInterface {
                 investConfig.tokenToBuy,
                 amountToSwap
             );
-            uint256 amountOut = swapper.swap(
-                amountToSwap,
-                address(s_usdc),
-                investConfig.tokenToBuy,
-                investor,
-                MAX_SLIPPAGE_BPS
-            );
 
-            //Asset Swap failed
-            if (amountOut == 0) {
-                console.log("Swap failed");
+            try
+                swapper.swap(
+                    amountToSwap,
+                    address(s_usdc),
+                    investConfig.tokenToBuy,
+                    investor,
+                    MAX_SLIPPAGE_BPS
+                )
+            returns (uint256 amountOut) {
+                //Asset Swap failed
+                if (amountOut == 0) {
+                    console.log("Swap failed");
+                    continue;
+                }
+
+                s_addressToInvestConfig[investor]
+                    .amountDeposited -= amountToSwap;
+
+                if (s_addressToInvestConfig[investor].amountDeposited <= 0) {
+                    console.log(
+                        "No more fund to swap, removing address from investors list"
+                    );
+                    deleteAddress(investor);
+                } else {
+                    s_addressToInvestConfig[investor].nextBuyTimestamp =
+                        block.timestamp +
+                        investConfig.buyInterval;
+                }
+            } catch Error(string memory reason) {
+                console.log("Swap failed : %o", reason);
+                // catch failing revert() and require()
+                emit Log(reason);
                 continue;
-            }
-
-            s_addressToInvestConfig[investor].amountDeposited -= amountToSwap;
-
-            if (s_addressToInvestConfig[investor].amountDeposited <= 0) {
-                console.log(
-                    "No more fund to swap, removing address from investors list"
-                );
-                deleteAddress(investor);
-            } else {
-                s_addressToInvestConfig[investor].nextBuyTimestamp =
-                    block.timestamp +
-                    investConfig.buyInterval;
+            } catch (bytes memory reason) {
+                // catch failing assert()
+                emit LogBytes(reason);
+                continue;
             }
         }
     }
