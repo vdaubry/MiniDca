@@ -10,7 +10,10 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
   const [isModalVisible, setIsModalVisible] = useState(0);
   const { isWeb3Enabled } = useMoralis();
   const dispatch = useNotification();
-  const [fundingAmount, setFundingAmount] = useState("0");
+  const [fundingAmount, setFundingAmount] = useState(0);
+  const [tokenToBuyAddress, setTokenToBuyAddress] = useState("");
+  const [amountToBuy, setAmountToBuy] = useState(0);
+  const [buyInterval, setBuyInterval] = useState(0);
   const [shouldFundContract, setShouldFundContract] = useState(false);
 
   /**************************************
@@ -27,7 +30,12 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
     abi: dcaAbi,
     contractAddress: dcaAddress,
     functionName: "deposit",
-    params: { depositAmount: fundingAmount },
+    params: {
+      depositAmount: fundingAmount,
+      tokenToBuyAddress: tokenToBuyAddress,
+      amountToBuy: amountToBuy,
+      buyInterval: buyInterval,
+    },
   });
 
   const handleSuccess = async (tx) => {
@@ -72,8 +80,16 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
     setIsModalVisible(false);
   };
 
-  const onOk = async (_fundingAmount) => {
+  const onOk = async (
+    _fundingAmount,
+    _tokenToBuyAddress,
+    _amountToBuy,
+    _buyInterval
+  ) => {
     setFundingAmount(_fundingAmount);
+    setTokenToBuyAddress(_tokenToBuyAddress);
+    setAmountToBuy(_amountToBuy);
+    setBuyInterval(_buyInterval);
     setShouldFundContract(true);
     setIsModalVisible(false);
     console.log("Funding contract");

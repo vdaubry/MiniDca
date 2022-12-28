@@ -2,20 +2,35 @@
 
 This project demonstrates a basic DCA protocol. Similar to mean.finance
 
+
+## start a local blockchain and deploy smart contract 
+
+```shell
+hh node --network hardhat
+```
+
+## Mint USDC locally :
+
+```shell
+hh run ./scripts/mintUsdc.js --network localhost
+```
+
 ## Tests :
 
 ```shell
-npx hardhat test
+hh test
 ```
 
 ## Gas report :
 
 ```shell
-REPORT_GAS=true npx hardhat test
+hh test
 ```
+
+=> Results in gas-report.txt
 
 ## Deploy to testnet
 
 ```shell
-npx hardhat run scripts/deploy.js
+hh deploy --network goerli
 ```

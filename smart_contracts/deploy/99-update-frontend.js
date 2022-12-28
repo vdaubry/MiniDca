@@ -2,13 +2,13 @@ const fs = require("fs");
 const { network, ethers } = require("hardhat");
 const {
   developmentChains,
-  USDC_CONTRACT_ADRESSES,
-  USDC_TESTNET_ABI,
+  networkConfig,
 } = require("../helper-hardhat-config");
+const { getAbi } = require("../utils/getAbi");
 
 const frontendAddressesFile = "../frontend/constants/contractAddresses.json";
 const frontendDcaAbiFile = "../frontend/constants/dca_abi.json";
-const frontendUsdcAbiFile = "../frontend/constants/usdc_abi.json";
+const frontendERC20AbiFile = "../frontend/constants/erc20_abi.json";
 
 module.exports = async (hre) => {
   await updateAddresses();
@@ -19,18 +19,11 @@ const updateAddresses = async () => {
   const dca = await ethers.getContract("Dca");
   const adresses = JSON.parse(fs.readFileSync(frontendAddressesFile, "utf8"));
   const chainId = network.config.chainId;
-
-  let usdc_address = "";
-  if (developmentChains.includes(network.name)) {
-    const usdc = await ethers.getContract("Usdc");
-    usdc_address = usdc.address;
-  } else {
-    usdc_address = USDC_CONTRACT_ADRESSES[chainId]["address"];
-  }
+  const usdcTokenAddress = networkConfig[chainId].usdcToken;
 
   adresses[chainId] = {
     dca: dca.address,
-    usdc: usdc_address,
+    usdc: usdcTokenAddress,
   };
 
   fs.writeFileSync(frontendAddressesFile, JSON.stringify(adresses));
@@ -43,15 +36,8 @@ const updateAbi = async () => {
     dca.interface.format(ethers.utils.FormatTypes.json)
   );
 
-  let usdc_abi_json = "";
-  if (developmentChains.includes(network.name)) {
-    const usdc = await ethers.getContract("Usdc");
-    usdc_abi_json = usdc.interface.format(ethers.utils.FormatTypes.json);
-  } else {
-    usdc_abi_json = JSON.stringify(USDC_TESTNET_ABI);
-  }
-
-  fs.writeFileSync(frontendUsdcAbiFile, usdc_abi_json);
+  let erc20Abi = fs.readFileSync("./utils/abis/erc20.json", "utf8");
+  fs.writeFileSync(frontendERC20AbiFile, erc20Abi);
 };
 
 module.exports.tags = ["all", "frontend"];

@@ -1,6 +1,6 @@
 const fs = require("fs");
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
-const { ethers, network, getNamedAccounts } = require("hardhat");
+const { ethers, network } = require("hardhat");
 const {
   developmentChains,
   networkConfig,
@@ -14,7 +14,7 @@ const mintUsdc = async (receiverAddress, amount) => {
 
   const usdcTokenAddress = networkConfig[network.config.chainId].usdcToken;
   const usdcAbi = JSON.parse(
-    fs.readFileSync("./utils/abis/usdc_abi.json", "utf8")
+    fs.readFileSync("./utils/abis/usdcAbi.json", "utf8")
   );
   const receiverSigner = await ethers.getSigner(receiverAddress);
   const usdc = await ethers.getContractAt(
