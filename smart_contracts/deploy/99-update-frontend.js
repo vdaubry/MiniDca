@@ -19,11 +19,13 @@ const updateAddresses = async () => {
   const dca = await ethers.getContract("Dca");
   const adresses = JSON.parse(fs.readFileSync(frontendAddressesFile, "utf8"));
   const chainId = network.config.chainId;
-  const usdcTokenAddress = networkConfig[chainId].usdcToken;
 
   adresses[chainId] = {
     dca: dca.address,
-    usdc: usdcTokenAddress,
+    usdc: networkConfig[chainId].usdcToken,
+    weth: networkConfig[chainId].wethToken,
+    wbtc: networkConfig[chainId].wbtcToken,
+    wmatic: networkConfig[chainId].wmaticToken,
   };
 
   fs.writeFileSync(frontendAddressesFile, JSON.stringify(adresses));
