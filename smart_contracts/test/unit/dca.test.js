@@ -76,7 +76,7 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
 
           const buyInterval = await dca.getBuyIntervalForAddress(deployer);
 
-          const amountToBuy = await dca.getAmounToBuyForAddress(deployer);
+          const amountToBuy = await dca.getAmountToBuyForAddress(deployer);
           assert.equal(ethers.utils.formatUnits(amountToBuy, 6), 10);
         });
 
@@ -125,7 +125,7 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
           const buyInterval = await dca.getBuyIntervalForAddress(deployer);
           assert.equal(buyInterval, 2);
 
-          const amountToBuy = await dca.getAmounToBuyForAddress(deployer);
+          const amountToBuy = await dca.getAmountToBuyForAddress(deployer);
           assert.equal(ethers.utils.formatUnits(amountToBuy, 6), 20);
         });
       });
