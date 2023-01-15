@@ -53,12 +53,12 @@ export default function DcaApp() {
     }
   }
 
-  // useEffect(() => {
-  //   if (shouldReloadUI) {
-  //     setShouldReloadUI(false);
-  //   }
-  //   updateUIValues();
-  // }, [shouldReloadUI, isUsdcApproved]);
+  useEffect(() => {
+    if (shouldReloadUI) {
+      setShouldReloadUI(false);
+    }
+    updateUIValues();
+  }, [shouldReloadUI, isUsdcApproved]);
 
   return (
     <div>

@@ -65,7 +65,7 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
   const handleApproveContract = async () => {
     await approveUsdc({
       onSuccess: handleSuccess,
-      onError: (error) => handleFailureNotification(error.data.message),
+      onError: (error) => handleFailureNotification(error.message),
     });
   };
 
