@@ -96,6 +96,8 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
   };
 
   const handleFundContract = async () => {
+    console.log("Funding contract");
+
     setShouldFundContract(false);
     await deposit({
       onSuccess: handleSuccess,
@@ -105,11 +107,11 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
     });
   };
 
-  useEffect(() => {
-    if (isWeb3Enabled && shouldFundContract) {
-      handleFundContract();
-    }
-  }, [isWeb3Enabled, shouldFundContract]);
+  // useEffect(() => {
+  //   if (isWeb3Enabled && shouldFundContract) {
+  //     handleFundContract();
+  //   }
+  // }, [isWeb3Enabled, shouldFundContract]);
 
   return (
     <div>

@@ -3,7 +3,6 @@ require("hardhat-deploy");
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
 require("solidity-coverage");
-require("solidity-coverage");
 require("hardhat-contract-sizer");
 require("dotenv").config();
 

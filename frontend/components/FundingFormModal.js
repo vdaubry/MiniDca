@@ -25,7 +25,7 @@ export default function FundingFormModal({ isVisible, onClose, onOk }) {
           onChange={(event) => {
             setFundingAmount(event.target.value);
           }}
-          class="mb-4"
+          className="mb-4"
         />
       </div>
       <div className="mb-6">
