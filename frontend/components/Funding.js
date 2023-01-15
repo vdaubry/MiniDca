@@ -6,7 +6,14 @@ import { ethers } from "ethers";
 import { useNotification, Bell } from "web3uikit";
 import FundingFormModal from "./FundingFormModal";
 
-export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
+export default function Funding({
+  dcaAddress,
+  usdcAddress,
+  onChangeBalance,
+  wethAddress,
+  wbtcAddress,
+  wmaticAddress,
+}) {
   const [isModalVisible, setIsModalVisible] = useState(0);
   const { isWeb3Enabled } = useMoralis();
   const dispatch = useNotification();
@@ -98,7 +105,7 @@ export default function Funding({ dcaAddress, usdcAddress, onChangeBalance }) {
     await deposit({
       onSuccess: handleSuccess,
       onError: (error) => {
-        handleFailureNotification(error.message);
+        handleFailureNotification(error[0]);
       },
     });
   };
