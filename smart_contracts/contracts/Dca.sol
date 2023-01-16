@@ -244,7 +244,7 @@ contract Dca is AutomationCompatibleInterface {
         return s_addressToInvestConfig[investor].nextBuyTimestamp;
     }
 
-    function getAmounToBuyForAddress(
+    function getAmountToBuyForAddress(
         address investor
     ) public view returns (uint256) {
         return s_addressToInvestConfig[investor].amountToBuy;

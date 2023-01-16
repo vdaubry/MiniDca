@@ -10,14 +10,16 @@ import { usdcAbi, contractAddresses } from "../constants";
 export default function DcaApp() {
   const { chainId: chainIdHex, account, isWeb3Enabled } = useMoralis();
   const chainId = parseInt(chainIdHex);
-  const dcaAddress =
-    chainIdHex && contractAddresses[chainId]
-      ? contractAddresses[chainId]["dca"]
-      : null;
-  const usdcAddress =
-    chainIdHex && contractAddresses[chainId]
-      ? contractAddresses[chainId]["usdc"]
-      : null;
+  let dcaAddress, usdcAddress, wethAddress, wbtcAddress, wmaticAddress;
+
+  if (chainIdHex && contractAddresses[chainId]) {
+    dcaAddress = contractAddresses[chainId]["dca"];
+    usdcAddress = contractAddresses[chainId]["usdc"];
+    wethAddress = contractAddresses[chainId]["weth"];
+    wbtcAddress = contractAddresses[chainId]["wbtc"];
+    wmaticAddress = contractAddresses[chainId]["wmatic"];
+  }
+
   const [shouldReloadUI, setShouldReloadUI] = useState(false);
   const [isUsdcApproved, setIsUsdcApproved] = useState(false);
 
@@ -69,11 +71,14 @@ export default function DcaApp() {
         shouldReloadUI={shouldReloadUI}
       />
 
-      {isUsdcApproved ? (
+      {true ? (
         <div>
           <Funding
             dcaAddress={dcaAddress}
             usdcAddress={usdcAddress}
+            wethAddress={wethAddress}
+            wbtcAddress={wbtcAddress}
+            wmaticAddress={wmaticAddress}
             onChangeBalance={onChangeBalance}
           />
           <Withdrawing
