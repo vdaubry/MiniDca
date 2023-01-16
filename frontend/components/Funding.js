@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { useWeb3Contract } from "react-moralis";
+import { useNetwork, useAccount, useContractRead } from "wagmi";
 import { dcaAbi } from "../constants";
-import { useMoralis } from "react-moralis";
-import { ethers } from "ethers";
 import { useNotification, Bell } from "web3uikit";
 import FundingFormModal from "./FundingFormModal";
 
@@ -15,13 +13,12 @@ export default function Funding({
   wmaticAddress,
 }) {
   const [isModalVisible, setIsModalVisible] = useState(0);
-  const { isWeb3Enabled } = useMoralis();
   const dispatch = useNotification();
-  const [fundingAmount, setFundingAmount] = useState(0);
-  const [tokenToBuyAddress, setTokenToBuyAddress] = useState("");
-  const [amountToBuy, setAmountToBuy] = useState(0);
-  const [buyInterval, setBuyInterval] = useState(0);
-  const [shouldFundContract, setShouldFundContract] = useState(false);
+  // const [fundingAmount, setFundingAmount] = useState(0);
+  // const [tokenToBuyAddress, setTokenToBuyAddress] = useState("");
+  // const [amountToBuy, setAmountToBuy] = useState(0);
+  // const [buyInterval, setBuyInterval] = useState(0);
+  // const [shouldFundContract, setShouldFundContract] = useState(false);
 
   /**************************************
    *

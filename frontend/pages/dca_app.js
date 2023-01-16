@@ -1,18 +1,22 @@
 import AppHeader from "../components/AppHeader";
 import Funding from "../components/Funding";
 import Withdrawing from "../components/Withdrawing";
-import { useWeb3Contract, useMoralis } from "react-moralis";
 import CurrentInvestment from "../components/CurrentInvestment";
 import ApproveToken from "../components/ApproveToken";
 import { useEffect, useState } from "react";
 import { usdcAbi, contractAddresses } from "../constants";
+import { useNetwork, useAccount, useContractRead } from "wagmi";
 
 export default function DcaApp() {
-  const { chainId: chainIdHex, account, isWeb3Enabled } = useMoralis();
-  const chainId = parseInt(chainIdHex);
-  let dcaAddress, usdcAddress, wethAddress, wbtcAddress, wmaticAddress;
+  const { chain } = useNetwork();
+  const { address: account, isConnected } = useAccount();
 
-  if (chainIdHex && contractAddresses[chainId]) {
+  const [shouldReloadUI, setShouldReloadUI] = useState(false);
+  const [isUsdcApproved, setIsUsdcApproved] = useState(false);
+
+  let dcaAddress, usdcAddress, wethAddress, wbtcAddress, wmaticAddress;
+  if (chain && contractAddresses[chain.id]) {
+    const chainId = chain.id;
     dcaAddress = contractAddresses[chainId]["dca"];
     usdcAddress = contractAddresses[chainId]["usdc"];
     wethAddress = contractAddresses[chainId]["weth"];
@@ -20,48 +24,47 @@ export default function DcaApp() {
     wmaticAddress = contractAddresses[chainId]["wmatic"];
   }
 
-  const [shouldReloadUI, setShouldReloadUI] = useState(false);
-  const [isUsdcApproved, setIsUsdcApproved] = useState(false);
-
   /**************************************
    *
    * Smart contract function calls
    *
    **************************************/
 
-  const { runContractFunction: allowance } = useWeb3Contract({
+  const { data: usdcAllowance } = useContractRead({
+    address: usdcAddress,
     abi: usdcAbi,
-    contractAddress: usdcAddress,
     functionName: "allowance",
-    params: { owner: account, spender: dcaAddress },
+    args: [account, dcaAddress],
   });
 
-  /**************************************
-   *
-   * Render UI
-   *
-   **************************************/
-
-  const onChangeBalance = () => {
-    setShouldReloadUI(true);
-  };
-
-  async function updateUIValues() {
-    const usdcAllowance = await allowance();
-    if (usdcAllowance == undefined) {
-      setShouldReloadUI(true);
-    } else {
-      setIsUsdcApproved(usdcAllowance > 0);
-    }
-  }
-
-  useEffect(() => {
-    if (shouldReloadUI) {
-      setShouldReloadUI(false);
-    }
-    updateUIValues();
-  }, [shouldReloadUI, isUsdcApproved]);
-
+  // const { runContractFunction: allowance } = useWeb3Contract({
+  //   abi: usdcAbi,
+  //   contractAddress: usdcAddress,
+  //   functionName: "allowance",
+  //   params: { owner: account, spender: dcaAddress },
+  // });
+  // /**************************************
+  //  *
+  //  * Render UI
+  //  *
+  //  **************************************/
+  // const onChangeBalance = () => {
+  //   setShouldReloadUI(true);
+  // };
+  // async function updateUIValues() {
+  //   const usdcAllowance = await allowance();
+  //   if (usdcAllowance == undefined) {
+  //     setShouldReloadUI(true);
+  //   } else {
+  //     setIsUsdcApproved(usdcAllowance > 0);
+  //   }
+  // }
+  // useEffect(() => {
+  //   if (shouldReloadUI) {
+  //     setShouldReloadUI(false);
+  //   }
+  //   updateUIValues();
+  // }, [shouldReloadUI, isUsdcApproved]);
   return (
     <div>
       <AppHeader />
@@ -70,10 +73,9 @@ export default function DcaApp() {
         usdcAddress={usdcAddress}
         shouldReloadUI={shouldReloadUI}
       />
-
-      {true ? (
+      {usdcAllowance > 0 ? (
         <div>
-          <Funding
+          {/* <Funding
             dcaAddress={dcaAddress}
             usdcAddress={usdcAddress}
             wethAddress={wethAddress}
@@ -84,7 +86,7 @@ export default function DcaApp() {
           <Withdrawing
             dcaAddress={dcaAddress}
             onChangeBalance={onChangeBalance}
-          />
+          /> */}
         </div>
       ) : (
         <ApproveToken

@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { useWeb3Contract, useMoralis } from "react-moralis";
+import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { usdcAbi } from "../constants";
 import { ethers } from "ethers";
 import { useNotification, Bell } from "web3uikit";
 
 export default function ApproveToken({ dcaAddress, usdcAddress }) {
   const [isModalVisible, setIsModalVisible] = useState(0);
-  const { account, isWeb3Enabled } = useMoralis();
   const dispatch = useNotification();
 
   /**************************************
@@ -15,26 +14,44 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
    *
    **************************************/
 
-  const {
-    runContractFunction: approveUsdc,
-    isFetching,
-    isLoading,
-  } = useWeb3Contract({
+  const { config } = usePrepareContractWrite({
+    address: usdcAddress,
     abi: usdcAbi,
-    contractAddress: usdcAddress,
     functionName: "approve",
-    params: { spender: dcaAddress, amount: ethers.constants.MaxInt256 },
+    args: [dcaAddress, ethers.constants.MaxInt256],
+  });
+  const { tx, isLoading, isSuccess, write } = useContractWrite({
+    ...config,
+    onError(error) {
+      handleFailureNotification(error);
+    },
+    onSuccess(tx) {
+      //TODO : wait for 1 block confirmation before displaying success notification
+      // See https://wagmi.sh/react/hooks/useWaitForTransaction
+      handleSuccessNotification();
+    },
   });
 
-  const handleSuccess = async (tx) => {
-    try {
-      await tx.wait(1);
-      console.log("transaction successful");
-      handleSuccessNotification();
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const {
+  //   runContractFunction: approveUsdc,
+  //   isFetching,
+  //   isLoading,
+  // } = useWeb3Contract({
+  //   abi: usdcAbi,
+  //   contractAddress: usdcAddress,
+  //   functionName: "approve",
+  //   params: { spender: dcaAddress, amount: ethers.constants.MaxInt256 },
+  // });
+
+  // const handleSuccess = async (tx) => {
+  //   try {
+  //     await tx.wait(1);
+  //     console.log("transaction successful");
+  //     handleSuccessNotification();
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   /**************************************
    *
@@ -62,17 +79,17 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
     });
   };
 
-  const handleApproveContract = async () => {
-    await approveUsdc({
-      onSuccess: handleSuccess,
-      onError: (error) => handleFailureNotification(error.message),
-    });
-  };
+  // const handleApproveContract = async () => {
+  //   await approveUsdc({
+  //     onSuccess: handleSuccess,
+  //     onError: (error) => handleFailureNotification(error.message),
+  //   });
+  // };
 
-  useEffect(() => {
-    if (isWeb3Enabled) {
-    }
-  }, [isWeb3Enabled]);
+  // useEffect(() => {
+  //   if (isWeb3Enabled) {
+  //   }
+  // }, [isWeb3Enabled]);
 
   return (
     <div>
@@ -80,12 +97,10 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
         <div>
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            disabled={isFetching || isLoading}
-            onClick={() => {
-              handleApproveContract();
-            }}
+            disabled={!write}
+            onClick={() => write?.()}
           >
-            {isLoading || isFetching ? (
+            {isLoading ? (
               <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
             ) : (
               <div>Approve USDC</div>

@@ -1,7 +1,6 @@
-import { useWeb3Contract } from "react-moralis";
-import { useMoralis } from "react-moralis";
 import { dcaAbi, usdcAbi } from "../constants";
 import { useEffect, useState } from "react";
+import { useAccount, useContractRead } from "wagmi";
 import { ethers } from "ethers";
 import Image from "next/image";
 
@@ -10,13 +9,14 @@ export default function CurrentInvestment({
   usdcAddress,
   shouldReloadUI,
 }) {
-  const { account, isWeb3Enabled } = useMoralis();
-  const [currentInvestment, setCurrentInvestment] = useState(0);
-  const [tokenToBuy, setTokenToBuy] = useState("");
-  const [amountToBuy, setAmountToBuy] = useState(0);
-  const [buyFrequency, setBuyFrequency] = useState(0);
-  const [nextBuyTimestamp, setNextBuyTimestamp] = useState(0);
-  const [balance, setBalance] = useState(0);
+  const { address: account, isConnected } = useAccount();
+
+  // const [currentInvestment, setCurrentInvestment] = useState(0);
+  // const [tokenToBuy, setTokenToBuy] = useState("");
+  // const [amountToBuy, setAmountToBuy] = useState(0);
+  // const [buyFrequency, setBuyFrequency] = useState(0);
+  // const [nextBuyTimestamp, setNextBuyTimestamp] = useState(0);
+  // const [balance, setBalance] = useState(0);
 
   /**************************************
    *
@@ -26,61 +26,61 @@ export default function CurrentInvestment({
 
   const dcaContractParams = (functionName) => {
     return {
+      address: dcaAddress,
       abi: dcaAbi,
-      contractAddress: dcaAddress,
       functionName: functionName,
-      params: { investor: account },
+      args: [account],
     };
   };
 
-  const { runContractFunction: getCurrentInvestment } = useWeb3Contract(
+  const { data: currentInvestment } = useContractRead(
     dcaContractParams("getAmountInvestedForAddress")
   );
 
-  const { runContractFunction: getTokenToBuy } = useWeb3Contract(
+  const { data: tokenToBuy } = useContractRead(
     dcaContractParams("getTokenToBuyForAddress")
   );
 
-  const { runContractFunction: getAmountToBuy } = useWeb3Contract(
+  const { data: amountToBuy } = useContractRead(
     dcaContractParams("getAmountToBuyForAddress")
   );
 
-  const { runContractFunction: getBuyFrequency } = useWeb3Contract(
+  const { data: buyFrequency } = useContractRead(
     dcaContractParams("getBuyIntervalForAddress")
   );
 
-  const { runContractFunction: getNextBuyTimestamp } = useWeb3Contract(
+  const { data: nextBuyTimestamp } = useContractRead(
     dcaContractParams("getNextBuyTimestampForAddress")
   );
 
-  const { runContractFunction: getBalance } = useWeb3Contract({
+  const { data: balance } = useContractRead({
+    address: usdcAddress,
     abi: usdcAbi,
-    contractAddress: usdcAddress,
     functionName: "balanceOf",
-    params: { account: account },
+    args: [account],
   });
 
-  /**************************************
-   *
-   * Render UI
-   *
-   **************************************/
+  // /**************************************
+  //  *
+  //  * Render UI
+  //  *
+  //  **************************************/
 
-  const updateUIValues = async () => {
-    const currentInvestmentFromCall = (await getCurrentInvestment()).toString();
-    const tokenToBuyFromCall = (await getTokenToBuy()).toString();
-    const amountToBuyFromCall = (await getAmountToBuy()).toString();
-    const buyFrequencyFromCall = (await getBuyFrequency()).toString();
-    const nextBuyTimestampFromCall = (await getNextBuyTimestamp()).toString();
-    setCurrentInvestment(currentInvestmentFromCall);
-    setTokenToBuy(tokenToBuyFromCall);
-    setAmountToBuy(amountToBuyFromCall);
-    setBuyFrequency(buyFrequencyFromCall);
-    setNextBuyTimestamp(nextBuyTimestampFromCall);
+  // const updateUIValues = async () => {
+  //   const currentInvestmentFromCall = (await getCurrentInvestment()).toString();
+  //   const tokenToBuyFromCall = (await getTokenToBuy()).toString();
+  //   const amountToBuyFromCall = (await getAmountToBuy()).toString();
+  //   const buyFrequencyFromCall = (await getBuyFrequency()).toString();
+  //   const nextBuyTimestampFromCall = (await getNextBuyTimestamp()).toString();
+  //   setCurrentInvestment(currentInvestmentFromCall);
+  //   setTokenToBuy(tokenToBuyFromCall);
+  //   setAmountToBuy(amountToBuyFromCall);
+  //   setBuyFrequency(buyFrequencyFromCall);
+  //   setNextBuyTimestamp(nextBuyTimestampFromCall);
 
-    const balanceFromCall = (await getBalance()).toString();
-    setBalance(balanceFromCall);
-  };
+  //   const balanceFromCall = (await getBalance()).toString();
+  //   setBalance(balanceFromCall);
+  // };
 
   const logoFromAddress = (address) => {
     switch (address.toUpperCase()) {
@@ -99,11 +99,11 @@ export default function CurrentInvestment({
     return new Date(timestamp).toLocaleString();
   };
 
-  useEffect(() => {
-    if (isWeb3Enabled) {
-      updateUIValues();
-    }
-  }, [isWeb3Enabled, shouldReloadUI]);
+  // useEffect(() => {
+  //   if (isWeb3Enabled) {
+  //     updateUIValues();
+  //   }
+  // }, [isWeb3Enabled, shouldReloadUI]);
 
   return (
     <div>
@@ -111,7 +111,7 @@ export default function CurrentInvestment({
         <div>
           <div>
             Your current investment :{" "}
-            {ethers.utils.formatUnits(currentInvestment, 6)}{" "}
+            {ethers.utils.formatUnits(currentInvestment.toString(), 6)}{" "}
           </div>
           <div>
             Token to buy :
