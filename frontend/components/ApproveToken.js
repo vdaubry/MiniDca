@@ -23,12 +23,12 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
   const { tx, isLoading, isSuccess, write } = useContractWrite({
     ...config,
     onError(error) {
-      handleFailureNotification(error);
+      console.log(error);
     },
     onSuccess(tx) {
       //TODO : wait for 1 block confirmation before displaying success notification
-      // See https://wagmi.sh/react/hooks/useWaitForTransaction
-      handleSuccessNotification();
+      // See https://wagmi.sh/examples/contract-write
+      console.log("transaction successful" + tx);
     },
   });
 
@@ -59,25 +59,25 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
    *
    **************************************/
 
-  const handleSuccessNotification = () => {
-    dispatch({
-      type: "info",
-      message: "Transaction completed !",
-      title: "Tx notification",
-      position: "topR",
-      icon: <Bell fontSize={20} />,
-    });
-  };
+  // const handleSuccessNotification = () => {
+  //   dispatch({
+  //     type: "info",
+  //     message: "Transaction completed !",
+  //     title: "Tx notification",
+  //     position: "topR",
+  //     icon: <Bell fontSize={20} />,
+  //   });
+  // };
 
-  const handleFailureNotification = (msg) => {
-    dispatch({
-      type: "error",
-      message: msg,
-      title: "Error",
-      position: "topR",
-      icon: <Bell fontSize={20} />,
-    });
-  };
+  // const handleFailureNotification = (msg) => {
+  //   dispatch({
+  //     type: "error",
+  //     message: msg,
+  //     title: "Error",
+  //     position: "topR",
+  //     icon: <Bell fontSize={20} />,
+  //   });
+  // };
 
   // const handleApproveContract = async () => {
   //   await approveUsdc({
