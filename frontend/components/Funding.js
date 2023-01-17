@@ -12,12 +12,11 @@ export default function Funding({
   wmaticAddress,
 }) {
   const [isModalVisible, setIsModalVisible] = useState(0);
-  const dispatch = useNotification();
-  // const [fundingAmount, setFundingAmount] = useState(0);
-  // const [tokenToBuyAddress, setTokenToBuyAddress] = useState("");
-  // const [amountToBuy, setAmountToBuy] = useState(0);
-  // const [buyInterval, setBuyInterval] = useState(0);
-  // const [shouldFundContract, setShouldFundContract] = useState(false);
+  const [fundingAmount, setFundingAmount] = useState(0);
+  const [tokenToBuyAddress, setTokenToBuyAddress] = useState("");
+  const [amountToBuy, setAmountToBuy] = useState(0);
+  const [buyInterval, setBuyInterval] = useState(0);
+  const [shouldFundContract, setShouldFundContract] = useState(false);
 
   /**************************************
    *

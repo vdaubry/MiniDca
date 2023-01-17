@@ -37,24 +37,19 @@ export default function DcaApp() {
     args: [account, dcaAddress],
   });
 
-  // const { runContractFunction: allowance } = useWeb3Contract({
-  //   abi: usdcAbi,
-  //   contractAddress: usdcAddress,
-  //   functionName: "allowance",
-  //   params: { owner: account, spender: dcaAddress },
-  // });
-  // /**************************************
-  //  *
-  //  * Render UI
-  //  *
-  //  **************************************/
-  // const onChangeBalance = () => {
-  //   setShouldReloadUI(true);
-  // };
+  /**************************************
+   *
+   * Render UI
+   *
+   **************************************/
+
+  const onChangeBalance = () => {
+    setShouldReloadUI(true);
+  };
 
   useEffect(() => {
     setIsUsdcApproved(usdcAllowance > 0);
-  }, [usdcAllowance]);
+  }, [shouldReloadUI, usdcAllowance]);
 
   return (
     <div>
@@ -66,18 +61,20 @@ export default function DcaApp() {
       />
       {isUsdcApproved ? (
         <div>
-          {/* <Funding
+          {
+            <Funding
+              dcaAddress={dcaAddress}
+              usdcAddress={usdcAddress}
+              wethAddress={wethAddress}
+              wbtcAddress={wbtcAddress}
+              wmaticAddress={wmaticAddress}
+              onChangeBalance={onChangeBalance}
+            />
+            /*<Withdrawing
             dcaAddress={dcaAddress}
-            usdcAddress={usdcAddress}
-            wethAddress={wethAddress}
-            wbtcAddress={wbtcAddress}
-            wmaticAddress={wmaticAddress}
             onChangeBalance={onChangeBalance}
-          />
-          <Withdrawing
-            dcaAddress={dcaAddress}
-            onChangeBalance={onChangeBalance}
-          /> */}
+          /> */
+          }
         </div>
       ) : (
         <ApproveToken
