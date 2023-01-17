@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNetwork, useAccount, useContractRead } from "wagmi";
 import { dcaAbi } from "../constants";
-import { useNotification, Bell } from "web3uikit";
 import FundingFormModal from "./FundingFormModal";
 
 export default function Funding({

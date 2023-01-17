@@ -11,12 +11,12 @@ export default function CurrentInvestment({
 }) {
   const { address: account, isConnected } = useAccount();
 
-  // const [currentInvestment, setCurrentInvestment] = useState(0);
-  // const [tokenToBuy, setTokenToBuy] = useState("");
-  // const [amountToBuy, setAmountToBuy] = useState(0);
-  // const [buyFrequency, setBuyFrequency] = useState(0);
-  // const [nextBuyTimestamp, setNextBuyTimestamp] = useState(0);
-  // const [balance, setBalance] = useState(0);
+  const [currentInvestment, setCurrentInvestment] = useState(0);
+  const [tokenToBuy, setTokenToBuy] = useState("");
+  const [amountToBuy, setAmountToBuy] = useState(0);
+  const [buyFrequency, setBuyFrequency] = useState(0);
+  const [nextBuyDateStr, setNextBuyDateStr] = useState("");
+  const [balance, setBalance] = useState(0);
 
   /**************************************
    *
@@ -33,27 +33,27 @@ export default function CurrentInvestment({
     };
   };
 
-  const { data: currentInvestment } = useContractRead(
+  const { data: currentInvestmentFromCall } = useContractRead(
     dcaContractParams("getAmountInvestedForAddress")
   );
 
-  const { data: tokenToBuy } = useContractRead(
+  const { data: tokenToBuyFromCall } = useContractRead(
     dcaContractParams("getTokenToBuyForAddress")
   );
 
-  const { data: amountToBuy } = useContractRead(
+  const { data: amountToBuyFromCall } = useContractRead(
     dcaContractParams("getAmountToBuyForAddress")
   );
 
-  const { data: buyFrequency } = useContractRead(
+  const { data: buyFrequencyFromCall } = useContractRead(
     dcaContractParams("getBuyIntervalForAddress")
   );
 
-  const { data: nextBuyTimestamp } = useContractRead(
+  const { data: nextBuyTimestampFromCall } = useContractRead(
     dcaContractParams("getNextBuyTimestampForAddress")
   );
 
-  const { data: balance } = useContractRead({
+  const { data: balanceFromCall } = useContractRead({
     address: usdcAddress,
     abi: usdcAbi,
     functionName: "balanceOf",
@@ -65,22 +65,6 @@ export default function CurrentInvestment({
   //  * Render UI
   //  *
   //  **************************************/
-
-  // const updateUIValues = async () => {
-  //   const currentInvestmentFromCall = (await getCurrentInvestment()).toString();
-  //   const tokenToBuyFromCall = (await getTokenToBuy()).toString();
-  //   const amountToBuyFromCall = (await getAmountToBuy()).toString();
-  //   const buyFrequencyFromCall = (await getBuyFrequency()).toString();
-  //   const nextBuyTimestampFromCall = (await getNextBuyTimestamp()).toString();
-  //   setCurrentInvestment(currentInvestmentFromCall);
-  //   setTokenToBuy(tokenToBuyFromCall);
-  //   setAmountToBuy(amountToBuyFromCall);
-  //   setBuyFrequency(buyFrequencyFromCall);
-  //   setNextBuyTimestamp(nextBuyTimestampFromCall);
-
-  //   const balanceFromCall = (await getBalance()).toString();
-  //   setBalance(balanceFromCall);
-  // };
 
   const logoFromAddress = (address) => {
     switch (address.toUpperCase()) {
@@ -99,41 +83,38 @@ export default function CurrentInvestment({
     return new Date(timestamp).toLocaleString();
   };
 
-  // useEffect(() => {
-  //   if (isWeb3Enabled) {
-  //     updateUIValues();
-  //   }
-  // }, [isWeb3Enabled, shouldReloadUI]);
+  useEffect(() => {
+    const dataLoaded = currentInvestmentFromCall !== undefined;
+
+    if (dataLoaded) {
+      setCurrentInvestment(currentInvestmentFromCall);
+      setTokenToBuy(tokenToBuyFromCall);
+      setAmountToBuy(amountToBuyFromCall);
+      setBuyFrequency(buyFrequencyFromCall);
+      setNextBuyDateStr(dateStringFromTimestamp(nextBuyTimestampFromCall));
+      setBalance(balanceFromCall);
+    }
+  }, [currentInvestmentFromCall]);
 
   return (
     <div>
-      {dcaAddress ? (
-        <div>
-          <div>
-            Your current investment :{" "}
-            {ethers.utils.formatUnits(currentInvestment.toString(), 6)}{" "}
-          </div>
-          <div>
-            Token to buy :
-            <Image
-              src={logoFromAddress(tokenToBuy)}
-              alt="token"
-              width={60}
-              height={60}
-            />
-          </div>
-          <div>
-            Max amount to buy : {ethers.utils.formatUnits(amountToBuy, 6)}{" "}
-          </div>
-          <div>Buy frequency : {buyFrequency / 60 / 24} days</div>
-          <div>Your Usdc balance : {ethers.utils.formatUnits(balance, 6)} </div>
-          <div>Next buy date : {dateStringFromTimestamp(nextBuyTimestamp)}</div>
-        </div>
-      ) : (
-        <div>
-          <p>No contract address</p>
-        </div>
-      )}
+      <div>
+        Your current investment :{" "}
+        {ethers.utils.formatUnits(currentInvestment.toString(), 6)}{" "}
+      </div>
+      <div>
+        Token to buy :
+        <Image
+          src={logoFromAddress(tokenToBuy)}
+          alt="token"
+          width={60}
+          height={60}
+        />
+      </div>
+      <div>Max amount to buy : {ethers.utils.formatUnits(amountToBuy, 6)} </div>
+      <div>Buy frequency : {buyFrequency / 60 / 24} days</div>
+      <div>Your Usdc balance : {ethers.utils.formatUnits(balance, 6)} </div>
+      <div>Next buy date : {nextBuyDateStr}</div>
     </div>
   );
 }

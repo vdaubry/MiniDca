@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { usdcAbi } from "../constants";
 import { ethers } from "ethers";
-import { useNotification, Bell } from "web3uikit";
 
 export default function ApproveToken({ dcaAddress, usdcAddress }) {
   const [isModalVisible, setIsModalVisible] = useState(0);
-  const dispatch = useNotification();
+  //const dispatch = useNotification();
 
   /**************************************
    *
@@ -98,25 +97,19 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
 
   return (
     <div>
-      {dcaAddress ? (
-        <div>
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            disabled={!approveUsdc}
-            onClick={() => approveUsdc?.()}
-          >
-            {isLoading ? (
-              <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
-            ) : (
-              <div>Approve USDC</div>
-            )}
-          </button>
-        </div>
-      ) : (
-        <div>
-          <p>No contract address</p>
-        </div>
-      )}
+      <div>
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          disabled={!approveUsdc}
+          onClick={() => approveUsdc?.()}
+        >
+          {isLoading ? (
+            <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+          ) : (
+            <div>Approve USDC</div>
+          )}
+        </button>
+      </div>
     </div>
   );
 }

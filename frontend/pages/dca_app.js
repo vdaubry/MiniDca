@@ -51,20 +51,11 @@ export default function DcaApp() {
   // const onChangeBalance = () => {
   //   setShouldReloadUI(true);
   // };
-  // async function updateUIValues() {
-  //   const usdcAllowance = await allowance();
-  //   if (usdcAllowance == undefined) {
-  //     setShouldReloadUI(true);
-  //   } else {
-  //     setIsUsdcApproved(usdcAllowance > 0);
-  //   }
-  // }
-  // useEffect(() => {
-  //   if (shouldReloadUI) {
-  //     setShouldReloadUI(false);
-  //   }
-  //   updateUIValues();
-  // }, [shouldReloadUI, isUsdcApproved]);
+
+  useEffect(() => {
+    setIsUsdcApproved(usdcAllowance > 0);
+  }, [usdcAllowance]);
+
   return (
     <div>
       <AppHeader />
@@ -73,7 +64,7 @@ export default function DcaApp() {
         usdcAddress={usdcAddress}
         shouldReloadUI={shouldReloadUI}
       />
-      {usdcAllowance > 0 ? (
+      {isUsdcApproved ? (
         <div>
           {/* <Funding
             dcaAddress={dcaAddress}
