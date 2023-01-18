@@ -4,6 +4,7 @@ import "@fortawesome/fontawesome-svg-core/styles.css";
 import { WagmiConfig } from "wagmi";
 import { client } from "../utils/wagmi";
 import { ConnectKitProvider } from "connectkit";
+import { NotificationProvider } from "web3uikit";
 
 import Head from "next/head";
 
@@ -19,7 +20,9 @@ function MiniDCA({ Component, pageProps }) {
       </Head>
       <WagmiConfig client={client}>
         <ConnectKitProvider>
-          <Component {...pageProps} />
+          <NotificationProvider>
+            <Component {...pageProps} />
+          </NotificationProvider>
         </ConnectKitProvider>
       </WagmiConfig>
     </div>

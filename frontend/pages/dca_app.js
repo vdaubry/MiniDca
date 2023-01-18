@@ -62,18 +62,20 @@ export default function DcaApp() {
       {isUsdcApproved ? (
         <div>
           {
-            <Funding
-              dcaAddress={dcaAddress}
-              usdcAddress={usdcAddress}
-              wethAddress={wethAddress}
-              wbtcAddress={wbtcAddress}
-              wmaticAddress={wmaticAddress}
-              onChangeBalance={onChangeBalance}
-            />
-            /*<Withdrawing
-            dcaAddress={dcaAddress}
-            onChangeBalance={onChangeBalance}
-          /> */
+            <>
+              <Funding
+                dcaAddress={dcaAddress}
+                usdcAddress={usdcAddress}
+                wethAddress={wethAddress}
+                wbtcAddress={wbtcAddress}
+                wmaticAddress={wmaticAddress}
+                onChangeBalance={onChangeBalance}
+              />
+              <Withdrawing
+                dcaAddress={dcaAddress}
+                onChangeBalance={onChangeBalance}
+              />
+            </>
           }
         </div>
       ) : (

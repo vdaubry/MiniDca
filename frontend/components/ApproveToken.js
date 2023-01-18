@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { usdcAbi } from "../constants";
 import { ethers } from "ethers";
+import { useNotification, Bell } from "web3uikit";
 
 export default function ApproveToken({ dcaAddress, usdcAddress }) {
-  const [isModalVisible, setIsModalVisible] = useState(0);
-  //const dispatch = useNotification();
+  const dispatch = useNotification();
 
   /**************************************
    *
@@ -27,12 +27,12 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
   } = useContractWrite({
     ...config,
     onError(error) {
-      console.log(error);
+      handleFailureNotification(error);
     },
     onSuccess(tx) {
       //TODO : wait for 1 block confirmation before displaying success notification
       // See https://wagmi.sh/examples/contract-write
-      console.log("transaction successful" + tx);
+      handleSuccessNotification();
     },
   });
 
@@ -63,25 +63,25 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
    *
    **************************************/
 
-  // const handleSuccessNotification = () => {
-  //   dispatch({
-  //     type: "info",
-  //     message: "Transaction completed !",
-  //     title: "Tx notification",
-  //     position: "topR",
-  //     icon: <Bell fontSize={20} />,
-  //   });
-  // };
+  const handleSuccessNotification = () => {
+    dispatch({
+      type: "info",
+      message: "Transaction completed !",
+      title: "Tx notification",
+      position: "topR",
+      icon: <Bell fontSize={20} />,
+    });
+  };
 
-  // const handleFailureNotification = (msg) => {
-  //   dispatch({
-  //     type: "error",
-  //     message: msg,
-  //     title: "Error",
-  //     position: "topR",
-  //     icon: <Bell fontSize={20} />,
-  //   });
-  // };
+  const handleFailureNotification = (msg) => {
+    dispatch({
+      type: "error",
+      message: msg,
+      title: "Error",
+      position: "topR",
+      icon: <Bell fontSize={20} />,
+    });
+  };
 
   // const handleApproveContract = async () => {
   //   await approveUsdc({

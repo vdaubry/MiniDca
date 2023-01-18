@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNetwork, useAccount, useContractRead } from "wagmi";
+import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { dcaAbi } from "../constants";
 import FundingFormModal from "./FundingFormModal";
+import { useNotification, Bell } from "web3uikit";
 
 export default function Funding({
   dcaAddress,
@@ -13,10 +14,14 @@ export default function Funding({
 }) {
   const [isModalVisible, setIsModalVisible] = useState(0);
   const [fundingAmount, setFundingAmount] = useState(0);
-  const [tokenToBuyAddress, setTokenToBuyAddress] = useState("");
+  const [tokenToBuyAddress, setTokenToBuyAddress] = useState(
+    "0x7c9f4c87d911613fe9ca58b579f737911aad2d43"
+  );
   const [amountToBuy, setAmountToBuy] = useState(0);
   const [buyInterval, setBuyInterval] = useState(0);
   const [shouldFundContract, setShouldFundContract] = useState(false);
+
+  const dispatch = useNotification();
 
   /**************************************
    *
@@ -24,32 +29,55 @@ export default function Funding({
    *
    **************************************/
 
-  const {
-    runContractFunction: deposit,
-    isFetching,
-    isLoading,
-  } = useWeb3Contract({
+  const { config } = usePrepareContractWrite({
+    address: dcaAddress,
     abi: dcaAbi,
-    contractAddress: dcaAddress,
     functionName: "deposit",
-    params: {
-      depositAmount: fundingAmount,
-      tokenToBuyAddress: tokenToBuyAddress,
-      amountToBuy: amountToBuy,
-      buyInterval: buyInterval,
+    args: [fundingAmount, tokenToBuyAddress, amountToBuy, buyInterval],
+  });
+  const {
+    tx,
+    isLoading,
+    isSuccess,
+    write: deposit,
+  } = useContractWrite({
+    ...config,
+    onError(error) {
+      handleFailureNotification(error.message);
+    },
+    onSuccess(tx) {
+      //TODO : wait for 1 block confirmation
+      // See https://wagmi.sh/examples/contract-write
+      handleSuccessNotification();
     },
   });
 
-  const handleSuccess = async (tx) => {
-    try {
-      await tx.wait(1);
-      setIsModalVisible(false);
-      handleSuccessNotification();
-      onChangeBalance();
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const {
+  //   runContractFunction: deposit,
+  //   isFetching,
+  //   isLoading,
+  // } = useWeb3Contract({
+  //   abi: dcaAbi,
+  //   contractAddress: dcaAddress,
+  //   functionName: "deposit",
+  //   params: {
+  //     depositAmount: fundingAmount,
+  //     tokenToBuyAddress: tokenToBuyAddress,
+  //     amountToBuy: amountToBuy,
+  //     buyInterval: buyInterval,
+  //   },
+  // });
+
+  // const handleSuccess = async (tx) => {
+  //   try {
+  //     await tx.wait(1);
+  //     setIsModalVisible(false);
+  //     handleSuccessNotification();
+  //     onChangeBalance();
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   /**************************************
    *
@@ -95,21 +123,22 @@ export default function Funding({
     setIsModalVisible(false);
   };
 
-  const handleFundContract = async () => {
+  const handleFundContract = () => {
     setShouldFundContract(false);
-    await deposit({
-      onSuccess: handleSuccess,
-      onError: (error) => {
-        handleFailureNotification(error[0]);
-      },
-    });
+    deposit?.();
+
+    // await deposit({
+    //   onSuccess: handleSuccess,
+    //   onError: (error) => {
+    //     handleFailureNotification(error[0]);
+    // });
   };
 
   useEffect(() => {
-    if (isWeb3Enabled && shouldFundContract) {
+    if (shouldFundContract) {
       handleFundContract();
     }
-  }, [isWeb3Enabled, shouldFundContract]);
+  }, [shouldFundContract]);
 
   return (
     <div>
@@ -122,12 +151,12 @@ export default function Funding({
           />
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            disabled={isFetching || isLoading}
+            disabled={!deposit}
             onClick={() => {
               setIsModalVisible(true);
             }}
           >
-            {isLoading || isFetching ? (
+            {isLoading ? (
               <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
             ) : (
               <div>Fund contract</div>
