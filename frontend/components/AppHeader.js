@@ -1,4 +1,4 @@
-import { ConnectButton } from "web3uikit";
+import { ConnectKitButton } from "connectkit";
 import Link from "next/link";
 
 export default function AppHeader() {
@@ -9,7 +9,7 @@ export default function AppHeader() {
           Minimalist DCA
         </Link>
         <div className="hidden lg:block">
-          <ConnectButton moralisAuth={false} />
+          <ConnectKitButton />
         </div>
       </div>
     </nav>

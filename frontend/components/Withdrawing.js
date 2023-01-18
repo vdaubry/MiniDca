@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
-import { useWeb3Contract } from "react-moralis";
 import { dcaAbi } from "../constants";
-import { useMoralis } from "react-moralis";
-import { ethers } from "ethers";
 import { useNotification, Bell } from "web3uikit";
+import { useContractWrite, usePrepareContractWrite } from "wagmi";
 
 export default function Funding({ dcaAddress, onChangeBalance }) {
-  const { isWeb3Enabled } = useMoralis();
   const dispatch = useNotification();
 
   /**************************************
@@ -15,16 +12,39 @@ export default function Funding({ dcaAddress, onChangeBalance }) {
    *
    **************************************/
 
-  const {
-    runContractFunction: withdrawFromContract,
-    isFetching,
-    isLoading,
-  } = useWeb3Contract({
+  const { config } = usePrepareContractWrite({
+    address: dcaAddress,
     abi: dcaAbi,
-    contractAddress: dcaAddress,
     functionName: "withdraw",
-    params: {},
+    args: [],
   });
+  const {
+    tx,
+    isLoading,
+    isSuccess,
+    write: withdrawFromContract,
+  } = useContractWrite({
+    ...config,
+    onError(error) {
+      handleFailureNotification(error.message);
+    },
+    onSuccess(tx) {
+      //TODO : wait for 1 block confirmation
+      // See https://wagmi.sh/examples/contract-write
+      handleSuccessNotification();
+    },
+  });
+
+  // const {
+  //   runContractFunction: withdrawFromContract,
+  //   isFetching,
+  //   isLoading,
+  // } = useWeb3Contract({
+  //   abi: dcaAbi,
+  //   contractAddress: dcaAddress,
+  //   functionName: "withdraw",
+  //   params: {},
+  // });
 
   const handleSuccess = async (tx) => {
     try {
@@ -55,33 +75,21 @@ export default function Funding({ dcaAddress, onChangeBalance }) {
 
   return (
     <div>
-      {dcaAddress ? (
+      <div>
         <div>
-          <div>
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              disabled={isFetching || isLoading}
-              onClick={async () => {
-                await withdrawFromContract({
-                  onSuccess: handleSuccess,
-                  onError: (error) => console.log(error),
-                });
-                console.log("Withdrawing from contract");
-              }}
-            >
-              {isLoading || isFetching ? (
-                <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
-              ) : (
-                <div>Withdraw</div>
-              )}
-            </button>
-          </div>
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            disabled={!withdrawFromContract}
+            onClick={() => withdrawFromContract?.()}
+          >
+            {isLoading ? (
+              <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+            ) : (
+              <div>Withdraw</div>
+            )}
+          </button>
         </div>
-      ) : (
-        <div>
-          <p>No contract address</p>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -1,15 +1,15 @@
-import { useMoralis } from "react-moralis";
 import { Modal, Input, Select } from "web3uikit";
 import { useState } from "react";
 import Image from "next/image";
 import { contractAddresses } from "../constants";
+import { useNetwork } from "wagmi";
 
 export default function FundingFormModal({ isVisible, onClose, onOk }) {
-  const { chainId: chainIdHex } = useMoralis();
-  const chainId = parseInt(chainIdHex);
+  const { chain } = useNetwork();
   let wethAddress, wbtcAddress, wmaticAddress;
 
-  if (chainIdHex && contractAddresses[chainId]) {
+  if (chain && contractAddresses[chain.id]) {
+    const chainId = chain.id;
     wethAddress = contractAddresses[chainId]["weth"];
     wbtcAddress = contractAddresses[chainId]["wbtc"];
     wmaticAddress = contractAddresses[chainId]["wmatic"];
