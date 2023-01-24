@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
 import { usdcAbi } from "../constants";
 import { ethers } from "ethers";
 import { useNotification, Bell } from "web3uikit";
@@ -19,19 +23,18 @@ export default function ApproveToken({ dcaAddress, usdcAddress }) {
     functionName: "approve",
     args: [dcaAddress, ethers.constants.MaxInt256],
   });
-  const {
-    tx,
-    isLoading,
-    isSuccess,
-    write: approveUsdc,
-  } = useContractWrite({
+
+  const { data, write: approveUsdc } = useContractWrite({
     ...config,
+  });
+
+  const { isLoading } = useWaitForTransaction({
+    hash: data?.hash,
+    confirmations: 1,
     onError(error) {
-      handleFailureNotification(error);
+      handleFailureNotification(error.message);
     },
-    onSuccess(tx) {
-      //TODO : wait for 1 block confirmation before displaying success notification
-      // See https://wagmi.sh/examples/contract-write
+    onSuccess(data) {
       handleSuccessNotification();
     },
   });

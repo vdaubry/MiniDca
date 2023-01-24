@@ -18,7 +18,7 @@ export default function FundingFormModal({ isVisible, onClose, onOk }) {
   const [fundingAmount, setFundingAmount] = useState(0);
   const [tokenToBuyAddress, setTokenToBuyAddress] = useState(wethAddress);
   const [amountToBuy, setAmountToBuy] = useState(0);
-  const [buyInterval, setBuyInterval] = useState(0);
+  const [buyInterval, setBuyInterval] = useState(60 * 60 * 24);
 
   return (
     <Modal

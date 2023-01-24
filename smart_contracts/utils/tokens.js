@@ -18,9 +18,14 @@ const getWETH = (deployer) => {
   return getTokenContract(wethTokenAddress, deployer);
 };
 
+const getWBTC = (deployer) => {
+  const wbtcTokenAddress = networkConfig[network.config.chainId].wbtcToken;
+  return getTokenContract(wbtcTokenAddress, deployer);
+};
+
 const getDAI = (deployer) => {
   const daiTokenAddress = networkConfig[network.config.chainId].daiToken;
   return getTokenContract(daiTokenAddress, deployer);
 };
 
-module.exports = { getUSDC, getWETH, getDAI };
+module.exports = { getUSDC, getWETH, getWBTC, getDAI };
