@@ -129,6 +129,7 @@ contract Dca is AutomationCompatibleInterface {
             s_addressToInvestConfig[lastAddress].index = investConfig.index;
         }
         s_investors.pop();
+        delete (s_addressToInvestConfig[addressToDelete]);
         return true;
     }
 
