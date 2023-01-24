@@ -101,6 +101,14 @@ const { prepareUpkeep } = require("../utils");
           assert.equal(isInvestor, true);
         });
 
+        it("adds deposito to investor config mapping", async () => {
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
+
+          const investorConfig = await dca.getInvestorConfig(deployer);
+          assert.equal(investorConfig.exists, true);
+          assert.equal(investorConfig.index, 0);
+        });
+
         it("updates investor infos on second deposit", async () => {
           await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
           await dca.deposit(50, dai.address, 20, 2);
