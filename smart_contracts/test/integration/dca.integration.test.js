@@ -6,8 +6,8 @@ const { getUSDC, getWETH, getDAI, getWBTC } = require("../../utils/tokens");
 const { prepareUpkeep } = require("../utils");
 
 const depositForUser = async (
-  userBuy,
   userDeposit,
+  userBuy,
   user,
   dca,
   usdc,
@@ -20,6 +20,7 @@ const depositForUser = async (
   await mintUsdc(user, amount);
   await connectedUserUsdc.approve(dca.address, ethers.constants.MaxInt256);
   await connectedUserDca.deposit(userDeposit, tokenToBuy, userBuy, 1);
+  return connectedUserDca;
 };
 
 if (!developmentChains.includes(network.name)) {
@@ -48,8 +49,8 @@ if (!developmentChains.includes(network.name)) {
       await usdc.approve(dca.address, ethers.constants.MaxInt256);
     });
 
-    describe("multiple deposit and withdraw", () => {
-      it("should allow multiple deposit and withdraw", async () => {
+    describe("single investor multiple deposit and withdraw", () => {
+      it("should allow multiple deposit and withdraw for single investor", async () => {
         await dca.deposit(100, weth.address, 10, BUY_INTERVAL);
         await dca.withdraw();
         await dca.deposit(200, wbtc.address, 1, BUY_INTERVAL);
@@ -64,24 +65,33 @@ if (!developmentChains.includes(network.name)) {
       });
     });
 
-    describe("multiple investors deposit and withdraw", () => {
-      it("should allow multiple investors to deposit and withdraw", async () => {
-        await dca.deposit(100, weth.address, 10, BUY_INTERVAL);
+    describe("Multiple investors deposit and withdraw", () => {
+      it("should allow multiple deposit and withdraw for multiple investors", async () => {
+        await dca.deposit(100, weth.address, 1, BUY_INTERVAL);
         await dca.withdraw();
-        await dca.deposit(200, wbtc.address, 1, BUY_INTERVAL);
+        const connectedUserDca = await depositForUser(
+          200,
+          2,
+          user,
+          dca,
+          usdc,
+          dai.address
+        );
 
-        const amountInvestedDeployer = await dca.getAmountInvestedForAddress(
+        const tokenToBuy = await connectedUserDca.getTokenToBuyForAddress(
           deployer
         );
-        assert.equal(
-          amountInvestedDeployer.toString(),
-          ethers.utils.parseUnits("200", 6).toString()
+        assert.equal(tokenToBuy.toString(), dai.address);
+
+        const amountToBuy = await connectedUserDca.getAmountToBuyForAddress(
+          deployer
         );
+        assert.equal(ethers.utils.formatUnits(amountToBuy, 6), 2);
       });
     });
 
-    describe("Multiple investors deposit", () => {
-      it.only("swaps assets for multiple investors", async () => {
+    describe("Multiple investors swaps assets", () => {
+      it("swaps assets for multiple investors", async () => {
         const deployerBuy = 10;
         const deployerDeposit = 50;
         await dca.deposit(
@@ -94,8 +104,8 @@ if (!developmentChains.includes(network.name)) {
         const userBuy = 20;
         const userDeposit = 50;
         await depositForUser(
-          userBuy,
           userDeposit,
+          userBuy,
           user,
           dca,
           usdc,

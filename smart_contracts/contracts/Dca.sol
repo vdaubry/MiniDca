@@ -153,7 +153,7 @@ contract Dca is AutomationCompatibleInterface {
         for (uint i = 0; i < s_investors.length; i++) {
             address investor = s_investors[i];
 
-            console.log("Check if Swap if need for address : %o ", investor);
+            console.log("Check if Swap is needed for address : %o ", investor);
 
             InvestConfig memory investConfig = s_addressToInvestConfig[
                 investor
@@ -244,7 +244,7 @@ contract Dca is AutomationCompatibleInterface {
         return s_addressToInvestConfig[investor].nextBuyTimestamp;
     }
 
-    function getAmounToBuyForAddress(
+    function getAmountToBuyForAddress(
         address investor
     ) public view returns (uint256) {
         return s_addressToInvestConfig[investor].amountToBuy;
