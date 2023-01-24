@@ -257,7 +257,15 @@ contract Dca is AutomationCompatibleInterface {
 
     function isInvestor(address investor) public view returns (bool) {
         uint256 index = s_addressToInvestConfig[investor].index;
-        return s_investors[index] == investor;
+        return
+            s_addressToInvestConfig[investor].exists &&
+            s_investors[index] == investor;
+    }
+
+    function getInvestorConfig(
+        address investor
+    ) public view returns (InvestConfig memory) {
+        return s_addressToInvestConfig[investor];
     }
 
     function getInvestors() public view returns (address[] memory) {

@@ -166,6 +166,25 @@ const { prepareUpkeep } = require("../utils");
           const dcaBalance = await usdc.balanceOf(dca.address);
           assert.equal(dcaBalance.toString(), ethers.utils.parseUnits("50", 6));
         });
+
+        it("removes users from investors list", async () => {
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
+
+          await dca.withdraw();
+
+          const isInvestor = await dca.isInvestor(deployer);
+          assert.equal(isInvestor, false);
+        });
+
+        it("removes users from investor config mapping", async () => {
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
+
+          await dca.withdraw();
+
+          const investorConfig = await dca.getInvestorConfig(deployer);
+          assert.equal(investorConfig.exists, false);
+          assert.equal(investorConfig.index, 0);
+        });
       });
 
       describe("checkUpKeep", () => {

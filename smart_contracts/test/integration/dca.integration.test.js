@@ -78,13 +78,11 @@ if (!developmentChains.includes(network.name)) {
           dai.address
         );
 
-        const tokenToBuy = await connectedUserDca.getTokenToBuyForAddress(
-          deployer
-        );
+        const tokenToBuy = await connectedUserDca.getTokenToBuyForAddress(user);
         assert.equal(tokenToBuy.toString(), dai.address);
 
         const amountToBuy = await connectedUserDca.getAmountToBuyForAddress(
-          deployer
+          user
         );
         assert.equal(ethers.utils.formatUnits(amountToBuy, 6), 2);
       });
