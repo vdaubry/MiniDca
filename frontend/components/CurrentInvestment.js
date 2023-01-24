@@ -94,7 +94,7 @@ export default function CurrentInvestment({
       setNextBuyDateStr(dateStringFromTimestamp(nextBuyTimestampFromCall));
       setBalance(balanceFromCall);
     }
-  }, [currentInvestmentFromCall]);
+  }, [currentInvestmentFromCall, buyFrequencyFromCall]);
 
   return (
     <div>

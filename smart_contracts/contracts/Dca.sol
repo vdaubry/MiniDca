@@ -129,6 +129,7 @@ contract Dca is AutomationCompatibleInterface {
             s_addressToInvestConfig[lastAddress].index = investConfig.index;
         }
         s_investors.pop();
+        delete (s_addressToInvestConfig[addressToDelete]);
         return true;
     }
 
@@ -153,7 +154,7 @@ contract Dca is AutomationCompatibleInterface {
         for (uint i = 0; i < s_investors.length; i++) {
             address investor = s_investors[i];
 
-            console.log("Check if Swap if need for address : %o ", investor);
+            console.log("Check if Swap is needed for address : %o ", investor);
 
             InvestConfig memory investConfig = s_addressToInvestConfig[
                 investor
@@ -256,7 +257,15 @@ contract Dca is AutomationCompatibleInterface {
 
     function isInvestor(address investor) public view returns (bool) {
         uint256 index = s_addressToInvestConfig[investor].index;
-        return s_investors[index] == investor;
+        return
+            s_addressToInvestConfig[investor].exists &&
+            s_investors[index] == investor;
+    }
+
+    function getInvestorConfig(
+        address investor
+    ) public view returns (InvestConfig memory) {
+        return s_addressToInvestConfig[investor];
     }
 
     function getInvestors() public view returns (address[] memory) {

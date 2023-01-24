@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
 import { dcaAbi } from "../constants";
 import FundingFormModal from "./FundingFormModal";
 import { useNotification, Bell } from "web3uikit";
@@ -35,19 +39,18 @@ export default function Funding({
     functionName: "deposit",
     args: [fundingAmount, tokenToBuyAddress, amountToBuy, buyInterval],
   });
-  const {
-    tx,
-    isLoading,
-    isSuccess,
-    write: deposit,
-  } = useContractWrite({
+
+  const { data, write: deposit } = useContractWrite({
     ...config,
+  });
+
+  const { isLoading } = useWaitForTransaction({
+    hash: data?.hash,
+    confirmations: 1,
     onError(error) {
       handleFailureNotification(error.message);
     },
-    onSuccess(tx) {
-      //TODO : wait for 1 block confirmation
-      // See https://wagmi.sh/examples/contract-write
+    onSuccess(data) {
       handleSuccessNotification();
     },
   });
@@ -125,7 +128,7 @@ export default function Funding({
 
   const handleFundContract = () => {
     setShouldFundContract(false);
-    deposit?.();
+    deposit();
 
     // await deposit({
     //   onSuccess: handleSuccess,
@@ -151,7 +154,7 @@ export default function Funding({
           />
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            disabled={!deposit}
+            disabled={!deposit || isLoading}
             onClick={() => {
               setIsModalVisible(true);
             }}

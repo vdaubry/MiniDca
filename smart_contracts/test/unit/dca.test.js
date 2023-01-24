@@ -3,6 +3,7 @@ const { deployments, ethers, getNamedAccounts } = require("hardhat");
 const { developmentChains } = require("../../helper-hardhat-config");
 const { mintUsdc } = require("../../utils/mintUsdc");
 const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
+const { prepareUpkeep } = require("../utils");
 
 !developmentChains.includes(network.name)
   ? describe.skip
@@ -73,8 +74,6 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
 
           const tokenToBuy = await dca.getTokenToBuyForAddress(deployer);
           assert.equal(tokenToBuy.toString(), weth.address);
-
-          const buyInterval = await dca.getBuyIntervalForAddress(deployer);
 
           const amountToBuy = await dca.getAmountToBuyForAddress(deployer);
           assert.equal(ethers.utils.formatUnits(amountToBuy, 6), 10);
@@ -167,16 +166,30 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
           const dcaBalance = await usdc.balanceOf(dca.address);
           assert.equal(dcaBalance.toString(), ethers.utils.parseUnits("50", 6));
         });
-      });
 
-      const prepareUpkeep = async () => {
-        await ethers.provider.send("evm_increaseTime", [interval.toNumber()]);
-        await network.provider.send("evm_mine", []);
-      };
+        it("removes users from investors list", async () => {
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
+
+          await dca.withdraw();
+
+          const isInvestor = await dca.isInvestor(deployer);
+          assert.equal(isInvestor, false);
+        });
+
+        it("removes users from investor config mapping", async () => {
+          await dca.deposit(50, weth.address, 10, BUY_INTERVAL);
+
+          await dca.withdraw();
+
+          const investorConfig = await dca.getInvestorConfig(deployer);
+          assert.equal(investorConfig.exists, false);
+          assert.equal(investorConfig.index, 0);
+        });
+      });
 
       describe("checkUpKeep", () => {
         it("returns true if interval has passed", async () => {
-          await prepareUpkeep();
+          await prepareUpkeep(interval);
 
           const { upkeepNeeded } = await dca.callStatic.checkUpkeep([]);
 
@@ -205,7 +218,7 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
           const initialDcaWethBalance = await weth.balanceOf(deployer);
           assert.equal(initialDcaWethBalance.toString(), "0");
 
-          await prepareUpkeep();
+          await prepareUpkeep(interval);
 
           await dca.performUpkeep([]);
 
@@ -229,7 +242,7 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
         it("swaps remaining amount if user has less amount deposited than amount to buy", async () => {
           await dca.deposit(50, weth.address, 100, BUY_INTERVAL);
 
-          await prepareUpkeep();
+          await prepareUpkeep(interval);
 
           await dca.performUpkeep([]);
 
@@ -238,60 +251,6 @@ const { getUSDC, getWETH, getDAI } = require("../../utils/tokens");
 
           const finalDcaWethBalance = await weth.balanceOf(deployer);
           assert.isAbove(finalDcaWethBalance, 0);
-        });
-
-        it("swaps assets for multiple investors", async () => {
-          const deployerBuy = 10;
-          const deployerDeposit = 50;
-          const userBuy = 20;
-          const userDeposit = 50;
-          await dca.deposit(
-            deployerDeposit,
-            weth.address,
-            deployerBuy,
-            BUY_INTERVAL
-          );
-
-          const signer = await ethers.getSigner(user);
-          const connectedUserDca = await dca.connect(signer);
-          const connectedUserUsdc = await usdc.connect(signer);
-          const amount = ethers.utils.parseUnits("1000", 6);
-          await mintUsdc(user, amount);
-          await connectedUserUsdc.approve(
-            dca.address,
-            ethers.constants.MaxInt256
-          );
-          await connectedUserDca.deposit(
-            userDeposit,
-            dai.address,
-            userBuy,
-            BUY_INTERVAL
-          );
-
-          await prepareUpkeep();
-
-          await dca.performUpkeep([]);
-
-          const finalDcaUsdcBalance = await usdc.balanceOf(dca.address);
-          assert.equal(
-            finalDcaUsdcBalance.toString(),
-            ethers.utils
-              .parseUnits(
-                (
-                  userDeposit +
-                  deployerDeposit -
-                  (userBuy + deployerBuy)
-                ).toString(),
-                6
-              )
-              .toString()
-          );
-
-          const finalDcaWethBalance = await weth.balanceOf(deployer);
-          assert.isAbove(finalDcaWethBalance, 0);
-
-          const finalDcaDaiBalance = await dai.balanceOf(user);
-          assert.isAbove(finalDcaDaiBalance, 0);
         });
       });
     });

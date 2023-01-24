@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { dcaAbi } from "../constants";
 import { useNotification, Bell } from "web3uikit";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
 
 export default function Funding({ dcaAddress, onChangeBalance }) {
   const dispatch = useNotification();
@@ -18,19 +22,18 @@ export default function Funding({ dcaAddress, onChangeBalance }) {
     functionName: "withdraw",
     args: [],
   });
-  const {
-    tx,
-    isLoading,
-    isSuccess,
-    write: withdrawFromContract,
-  } = useContractWrite({
+
+  const { data, write: withdrawFromContract } = useContractWrite({
     ...config,
+  });
+
+  const { isLoading } = useWaitForTransaction({
+    hash: data?.hash,
+    confirmations: 1,
     onError(error) {
       handleFailureNotification(error.message);
     },
-    onSuccess(tx) {
-      //TODO : wait for 1 block confirmation
-      // See https://wagmi.sh/examples/contract-write
+    onSuccess(data) {
       handleSuccessNotification();
     },
   });
