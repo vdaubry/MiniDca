@@ -4,6 +4,7 @@ pragma solidity ^0.8.7;
 import "./SimpleSwap.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
 import "hardhat/console.sol";
 
@@ -11,7 +12,7 @@ error Dca__DepositError();
 error Dca__WithdrawError();
 error Dca__UpkeepNotNeeded();
 
-contract Dca is AutomationCompatibleInterface {
+contract Dca is AutomationCompatibleInterface, Ownable {
     mapping(address => InvestConfig) s_addressToInvestConfig;
     address[] s_investors;
 
@@ -48,6 +49,9 @@ contract Dca is AutomationCompatibleInterface {
         lastTimeStamp = block.timestamp;
         swapper = SimpleSwap(_swapperAddress);
         s_investors = new address[](0);
+    }
+
+    function initialize() public onlyOwner {
         s_usdc.approve(address(swapper), type(uint256).max);
     }
 

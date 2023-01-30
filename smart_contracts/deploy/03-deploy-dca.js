@@ -33,12 +33,15 @@ module.exports = async (hre) => {
     KEEPERS_UPDATE_INTERVAL,
     swapper_address,
   ];
-  const dca = await deploy("Dca", {
+  await deploy("Dca", {
     from: deployer,
     args: arguments,
     log: true,
     waitConfirmations: waitBlockConfirmations,
   });
+
+  const dca = await ethers.getContract("Dca", deployer);
+  await dca.initialize({ gasLimit: 3e7 });
 
   /***********************************
    *

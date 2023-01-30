@@ -104,14 +104,19 @@ export default function CurrentInvestment({
       </div>
       <div>
         Token to buy :
-        <Image
-          src={logoFromAddress(tokenToBuy)}
-          alt="token"
-          width={60}
-          height={60}
-        />
+        {tokenToBuy && (
+          <Image
+            src={logoFromAddress(tokenToBuy)}
+            alt="token"
+            width={60}
+            height={60}
+          />
+        )}
       </div>
-      <div>Max amount to buy : {ethers.utils.formatUnits(amountToBuy, 6)} </div>
+      <div>
+        Max amount to buy :{" "}
+        {amountToBuy && ethers.utils.formatUnits(amountToBuy, 6)}{" "}
+      </div>
       <div>Buy frequency : {buyFrequency / 60 / 24} days</div>
       <div>Your Usdc balance : {ethers.utils.formatUnits(balance, 6)} </div>
       <div>Next buy date : {nextBuyDateStr}</div>
